@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "tasks": {
+    "start": "deno run --no-prompt --allow-env --allow-read --allow-write --allow-net --allow-ffi main.tsx",
+    "compile": "deno compile --no-prompt --allow-env --allow-read --allow-write --allow-net --allow-ffi --output mars main.tsx",
+    "allow": "deno run --no-prompt --allow-env --allow-net --allow-read",
+    "test": "deno test --allow-read --allow-write --allow-env"
+  },
+  "imports": {
+    "#src/": "./src/",
+    "#types": "./src/types.ts",
+
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/path": "jsr:@std/path@1",
+    "@std/fs": "jsr:@std/fs@1",
+    "@types/react": "npm:@types/react@^19.1.10",
+    "ink": "npm:ink@^6.2.0",
+    "ink-spinner": "npm:ink-spinner@^5.0.0",
+    "ink-text-input": "npm:ink-text-input@^6.0.0",
+    "react": "npm:react@^19.1.1"
+  }
+}
