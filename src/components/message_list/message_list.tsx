@@ -1,11 +1,11 @@
 import { useContext } from "react";
 import { MessageContext } from "#context/message_context/message_context.tsx";
 import { Box, Text } from "ink";
-import { MessageType } from "#components/message_list/message_list_types.ts";
+import { MessageType } from "./message_list_types.ts";
 import {
   getMessageColor,
   getMessagePrefix,
-} from "#utils/message_list/message_list_utils.tsx";
+} from "#components/message_list/message_list_utils.tsx";
 
 export const MessageList = () => {
   const { messages } = useContext(MessageContext);

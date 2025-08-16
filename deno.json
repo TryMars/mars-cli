@@ -10,11 +10,8 @@
     "test": "deno test --allow-read --allow-write --allow-env --env-file=.env.test --allow-run"
   },
   "imports": {
-    "#src/": "./src/",
-    "#utils/": "./src/utils/",
     "#components/": "./src/components/",
     "#context/": "./src/context/",
-    "#types": "./src/types.ts",
 
     "@std/assert": "jsr:@std/assert@1",
     "@std/expect": "jsr:@std/expect@^1.0.17",

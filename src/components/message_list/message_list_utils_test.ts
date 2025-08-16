@@ -1,8 +1,5 @@
 import { describe, it } from "@std/testing/bdd";
-import {
-  getMessageColor,
-  getMessagePrefix,
-} from "#utils/message_list/message_list_utils.tsx";
+import { getMessageColor, getMessagePrefix } from "./message_list_utils.tsx";
 import { expect } from "@std/expect";
 import { PropsWithChildren, ReactElement } from "react";
 import { Text } from "ink";

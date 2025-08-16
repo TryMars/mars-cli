@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { MessageType } from "#components/message_list/message_list_types.ts";
+import { MessageType } from "./message_list_types.ts";
 import { Text } from "ink";
 
 /**

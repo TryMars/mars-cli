@@ -2,7 +2,7 @@ import { createContext, ReactNode, useState } from "react";
 import {
   CreateMessageType,
   MessageContextType,
-} from "#context/message_context/message_context_types.ts";
+} from "./message_context_types.ts";
 import { MessageType } from "#components/message_list/message_list_types.ts";
 
 export const MessageContext = createContext<MessageContextType>({
