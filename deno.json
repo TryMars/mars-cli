@@ -21,6 +21,7 @@
     "@types/react": "npm:@types/react@^19.1.10",
     "ink": "npm:ink@^6.2.0",
     "ink-spinner": "npm:ink-spinner@^5.0.0",
+    "ink-testing-library": "npm:ink-testing-library@^4.0.0",
     "ink-text-input": "npm:ink-text-input@^6.0.0",
     "react": "npm:react@^19.1.1"
   }
