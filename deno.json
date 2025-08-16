@@ -11,6 +11,9 @@
   },
   "imports": {
     "#src/": "./src/",
+    "#utils/": "./src/utils/",
+    "#components/": "./src/components/",
+    "#context/": "./src/context/",
     "#types": "./src/types.ts",
 
     "@std/assert": "jsr:@std/assert@1",

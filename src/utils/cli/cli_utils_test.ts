@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
-import { parseCommandLineFlags } from "#src/utils/cli/cli.ts";
+import { parseCommandLineFlags } from "#src/utils/cli/cli_utils.ts";
 
 describe("cli utils", () => {
   it("can extract relevant arguments", () => {

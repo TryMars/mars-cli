@@ -1,57 +1,92 @@
 import { describe, it } from "@std/testing/bdd";
-import { createElement } from "react";
-import { MarsApp } from "./mars_app.tsx";
+import {
+  headlessModeText,
+  MarsApp,
+} from "#src/components/mars_app/mars_app.tsx";
 import { expect } from "@std/expect";
 import { inputBoxPlaceholderText } from "#src/components/input_box/input_box.tsx";
 import { render } from "ink-testing-library";
+import { MessageProvider } from "#src/context/message_context/message_context.tsx";
 
 describe(
   "mars integration tests",
   { sanitizeResources: false, sanitizeOps: false },
   () => {
-    // TODO: check for message instead of props
     describe("headless mode", () => {
-      it("sets headless mode to false by default", () => {
-        const component = createElement(MarsApp);
+      it("enters in headed mode by default", () => {
+        const marsApp = (
+          <MessageProvider>
+            <MarsApp />
+          </MessageProvider>
+        );
 
-        expect(component.props.headlessMode).toBe(undefined);
-      });
+        const { lastFrame, cleanup } = render(marsApp);
 
-      it("can set headless mode to be true", () => {
-        const component = createElement(MarsApp, { headlessMode: true });
-
-        expect(component.props.headlessMode).toBe(true);
-      });
-    });
-
-    // TODO: check for message instead of props
-    describe("input box", () => {
-      it("renders component", () => {
-        const { lastFrame, cleanup } = render(<MarsApp />);
-
-        expect(lastFrame()).toContain(inputBoxPlaceholderText);
+        // should not see a headless mode confirmation message
+        expect(lastFrame()).not.toContain(headlessModeText);
 
         cleanup();
       });
 
-      it("handles input and submit", () => {
+      it("can enter in headless mode", () => {
+        const marsApp = (
+          <MessageProvider>
+            <MarsApp headlessMode />
+          </MessageProvider>
+        );
+
+        const { lastFrame, cleanup, rerender } = render(marsApp);
+
+        // needs to rerender to give the headless mode confirmation
+        // message the time it needs to display.
+        rerender(marsApp);
+
+        // should see a headless mode confirmation message
+        expect(lastFrame()).toContain(headlessModeText);
+
+        cleanup();
+      });
+    });
+
+    describe("input box", () => {
+      const marsApp = (
+        <MessageProvider>
+          <MarsApp />
+        </MessageProvider>
+      );
+
+      const { lastFrame, stdin, rerender, cleanup } = render(marsApp);
+
+      it("renders component", () => {
+        // should see the placeholder text as our input box
+        // should be empty at this point.
+        expect(lastFrame()).toContain(inputBoxPlaceholderText);
+      });
+
+      it("handles,submits,displays input", () => {
         const input = "this is my input";
 
-        const { lastFrame, stdin, cleanup, rerender } = render(<MarsApp />);
-
         stdin.write(input);
-        rerender(<MarsApp />);
+        rerender(marsApp);
 
         expect(lastFrame()).not.toContain(inputBoxPlaceholderText);
         expect(lastFrame()).toContain(input);
 
+        // \r is the equivalent of pressing "enter/return"
         stdin.write("\r");
-        rerender(<MarsApp />);
+        rerender(marsApp);
 
+        // we should see the placeholder again since the inpout
+        // box should be cleared after submit
         expect(lastFrame()).toContain(inputBoxPlaceholderText);
 
-        cleanup();
+        // we should also see the input as it should be displayed in the
+        // message list component with the "> " prefix since it is
+        // a user message that we're displaying.
+        expect(lastFrame()).toContain(`> ${input}`);
       });
+
+      cleanup();
     });
   },
 );

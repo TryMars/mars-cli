@@ -1,8 +1,6 @@
 /**
- * Parses command line flags from the provided arguments array.
- *
- * @param args - Array of command line arguments to parse
- * @returns Object containing parsed flag options
+ * Parses command line flags from the provided arguments array
+ * and returns only supported arguments.
  */
 export const parseCommandLineFlags = (args: Array<string>) => {
   // TODO: handle --help / -h with a helpful message

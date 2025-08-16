@@ -1,6 +1,5 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
-import { headlessModeText } from "#src/components/mars_app/mars_app.tsx";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -25,23 +24,5 @@ describe("cli integration tests", () => {
     const output = await runCLI();
 
     expect(output.success).toBe(true);
-  });
-
-  describe("headless mode", () => {
-    it("runs cli withoutout headless argument", async () => {
-      const output = await runCLI();
-      const stdout = new TextDecoder().decode(output.stdout);
-
-      expect(stdout).not.toContain(headlessModeText);
-      expect(output.success).toBe(true);
-    });
-
-    it("runs cli with headless argument", async () => {
-      const output = await runCLI(["--headless"]);
-      const stdout = new TextDecoder().decode(output.stdout);
-
-      expect(stdout).toContain(headlessModeText);
-      expect(output.success).toBe(true);
-    });
   });
 });
