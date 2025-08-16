@@ -26,7 +26,7 @@ export const InputBox = () => {
 
   return (
     <>
-      <Box flexDirection="row" justifyContent="space-between">
+      <Box marginTop={1} flexDirection="row" justifyContent="space-between">
         <Text dimColor color="dim">
           claude-4-sonnett
         </Text>

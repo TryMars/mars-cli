@@ -11,7 +11,7 @@ export const MessageList = () => {
   const { messages } = useContext(MessageContext);
 
   return (
-    <Box marginY={1} flexDirection="column">
+    <Box marginTop={messages.length > 0 ? 1 : 0} flexDirection="column" gap={1}>
       {messages.map((message: MessageType) => (
         <Box flexDirection="row" gap={1} key={message.id}>
           {message.from !== "system" && (
