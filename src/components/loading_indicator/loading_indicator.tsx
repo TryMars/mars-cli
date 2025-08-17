@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Box, Text } from "ink";
 import Spinner from "ink-spinner";
-import { formatTime } from "./loading_indicator_utils.ts";
+import {
+  calculateElapsedSeconds,
+  formatTime,
+} from "./loading_indicator_utils.ts";
 
 export const LoadingIndicator = () => {
   const [startTime] = useState(new Date());
@@ -9,18 +12,14 @@ export const LoadingIndicator = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date();
-
-      const elapsed = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-
-      setElapsedTime(elapsed);
+      setElapsedTime(calculateElapsedSeconds(startTime));
     }, 1000);
 
     return () => clearInterval(interval);
   }, [startTime]);
 
   return (
-    <Box marginBottom={1}>
+    <Box marginTop={1}>
       <Box marginRight={1}>
         <Spinner type="star" />
       </Box>

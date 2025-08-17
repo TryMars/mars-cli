@@ -2,6 +2,7 @@ import { createContext, PropsWithChildren, useContext, useState } from "react";
 import { InputHandlerContextType } from "./input_handler_context_types.ts";
 import { MessageContext } from "../message_context/message_context.tsx";
 import { MessageType } from "#components/message_list/message_list_types.ts";
+import { LLMContext } from "../llm_context/llm_context.tsx";
 
 export const InputHandlerContext = createContext<InputHandlerContextType>({
   input: "",
@@ -11,6 +12,7 @@ export const InputHandlerContext = createContext<InputHandlerContextType>({
 
 export const InputHandlerProvider = ({ children }: PropsWithChildren) => {
   const { addMessage } = useContext(MessageContext);
+  const { handleUserMessage } = useContext(LLMContext);
   const [input, setInput] = useState<string>("");
 
   const handleSubmit = (from: MessageType["from"]) => {
@@ -21,7 +23,7 @@ export const InputHandlerProvider = ({ children }: PropsWithChildren) => {
       from,
     });
 
-    // TODO: contact LLM
+    handleUserMessage(input);
 
     setInput("");
   };

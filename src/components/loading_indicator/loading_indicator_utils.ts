@@ -8,3 +8,10 @@ export const formatTime = (seconds: number) => {
 
   return `${minutes}m ${remainingSeconds}s`;
 };
+
+export const calculateElapsedSeconds = (
+  startTime: Date,
+  currentTime: Date = new Date(),
+): number => {
+  return Math.floor((currentTime.getTime() - startTime.getTime()) / 1000);
+};

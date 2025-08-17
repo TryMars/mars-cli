@@ -4,6 +4,7 @@ import { App } from "#components/app/app.tsx";
 import { render } from "ink-testing-library";
 import { headlessModeText } from "#components/mars/mars.tsx";
 import { inputBoxPlaceholderText } from "#components/input_box/input_box.tsx";
+import { llmMockResponse } from "#context/llm_context/llm_context.tsx";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -66,36 +67,52 @@ describe(
 
       describe("input box", () => {
         const marsApp = <App />;
-
         const { lastFrame, stdin, rerender, cleanup } = render(marsApp);
+        const input = "this is my input";
 
-        it("renders component", () => {
+        it("renders input box", () => {
           // should see the placeholder text as our input box
           // should be empty at this point.
           expect(lastFrame()).toContain(inputBoxPlaceholderText);
         });
 
-        it("handles,submits,displays input", () => {
-          const input = "this is my input";
+        describe("user input", () => {
+          it("handles submitting", () => {
+            stdin.write(input);
+            rerender(marsApp);
 
-          stdin.write(input);
-          rerender(marsApp);
+            expect(lastFrame()).not.toContain(inputBoxPlaceholderText);
+            expect(lastFrame()).toContain(input);
 
-          expect(lastFrame()).not.toContain(inputBoxPlaceholderText);
-          expect(lastFrame()).toContain(input);
+            // \r is the equivalent of pressing "enter/return"
+            stdin.write("\r");
+            rerender(marsApp);
 
-          // \r is the equivalent of pressing "enter/return"
-          stdin.write("\r");
-          rerender(marsApp);
+            // we should see the placeholder again since the input
+            // box should be cleared after submit
+            expect(lastFrame()).toContain(inputBoxPlaceholderText);
+          });
 
-          // we should see the placeholder again since the inpout
-          // box should be cleared after submit
-          expect(lastFrame()).toContain(inputBoxPlaceholderText);
+          it("displays input", () => {
+            // we should also see the input as it should be displayed in the
+            // message list component with the "> " prefix
+            expect(lastFrame()).toContain(`> ${input}`);
+          });
 
-          // we should also see the input as it should be displayed in the
-          // message list component with the "> " prefix since it is
-          // a user message that we're displaying.
-          expect(lastFrame()).toContain(`> ${input}`);
+          it("displays loading indicator", () => {
+            expect(lastFrame()).toContain("Thinking...");
+          });
+
+          it("receives response from llm", () => {
+            setTimeout(() => {
+              // wait for the loading indicator to dissapear then rerender
+              rerender(marsApp);
+
+              // we should see the llm mock response in the message
+              // list with the ⏺ prefix
+              expect(lastFrame()).toContain(`⏺  ${llmMockResponse}`);
+            }, 1);
+          });
         });
 
         cleanup();
