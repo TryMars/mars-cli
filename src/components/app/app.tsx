@@ -4,17 +4,20 @@ import { MarsAppProps } from "#components/mars/mars_types.ts";
 import { InputHandlerProvider } from "#context/input_handler_context/input_handler_context.tsx";
 import { LoadingProvider } from "#context/loading_context/loading_context.tsx";
 import { LLMProvider } from "#context/llm_context/llm_context.tsx";
+import { ChatProvider } from "#context/chat_context/chat_context.tsx";
 
 export const App = (marsProps: MarsAppProps) => {
   return (
-    <MessageProvider>
-      <LoadingProvider>
-        <LLMProvider>
-          <InputHandlerProvider>
-            <Mars {...marsProps} />
-          </InputHandlerProvider>
-        </LLMProvider>
-      </LoadingProvider>
-    </MessageProvider>
+    <ChatProvider>
+      <MessageProvider>
+        <LoadingProvider>
+          <LLMProvider>
+            <InputHandlerProvider>
+              <Mars {...marsProps} />
+            </InputHandlerProvider>
+          </LLMProvider>
+        </LoadingProvider>
+      </MessageProvider>
+    </ChatProvider>
   );
 };

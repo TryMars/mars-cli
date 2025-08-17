@@ -1,12 +1,18 @@
-import { MessageType } from "#components/message_list/message_list_types.ts";
-
-export type MessageContextType = {
-  messages: MessageType[];
-  addMessage: (_: CreateMessageType) => void;
+export type MessageContextState = {
+  messages: Message[];
+  addMessage: (_: CreateMessageProps) => void;
 };
 
-export type CreateMessageType = {
+export type CreateMessageProps = {
   content: string;
-  from: MessageType["from"];
-  state?: MessageType["state"];
+  from: Message["from"];
+  state?: Message["state"];
+};
+
+export type Message = {
+  id: string;
+  from: "user" | "assistant" | "system";
+  content: string;
+  timestamp: Date;
+  state: "success" | "warning" | "error" | "neutral";
 };

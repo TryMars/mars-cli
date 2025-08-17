@@ -1,7 +1,7 @@
 import { createContext, PropsWithChildren, useState } from "react";
-import { LoadingContextType } from "./loading_context_types.ts";
+import { LoadingContextState } from "./loading_context_types.ts";
 
-export const LoadingContext = createContext<LoadingContextType>({
+export const LoadingContext = createContext<LoadingContextState>({
   isLoading: false,
   setIsLoading: (_: boolean) => {},
 });

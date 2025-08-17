@@ -1,8 +1,8 @@
 import { ReactElement } from "react";
-import { MessageType } from "./message_list_types.ts";
 import { Text } from "ink";
+import { Message } from "#context/message_context/message_context_types.ts";
 
-export const getMessageColor = (state: MessageType["state"]): string => {
+export const getMessageColor = (state: Message["state"]): string => {
   if (state === "success") return "green";
   if (state === "warning") return "yellow";
   if (state === "error") return "red";
@@ -11,7 +11,7 @@ export const getMessageColor = (state: MessageType["state"]): string => {
 };
 
 export const getMessagePrefix = (
-  from: MessageType["from"],
+  from: Message["from"],
 ): string | ReactElement<Text> => {
   if (from === "user") {
     return <Text dimColor>{">"}</Text>;

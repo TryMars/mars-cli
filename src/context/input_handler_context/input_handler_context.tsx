@@ -1,13 +1,13 @@
 import { createContext, PropsWithChildren, useContext, useState } from "react";
-import { InputHandlerContextType } from "./input_handler_context_types.ts";
-import { MessageContext } from "../message_context/message_context.tsx";
-import { MessageType } from "#components/message_list/message_list_types.ts";
-import { LLMContext } from "../llm_context/llm_context.tsx";
+import { InputHandlerContextState } from "./input_handler_context_types.ts";
+import { MessageContext } from "#context/message_context/message_context.tsx";
+import { LLMContext } from "#context/llm_context/llm_context.tsx";
+import { Message } from "#context/message_context/message_context_types.ts";
 
-export const InputHandlerContext = createContext<InputHandlerContextType>({
+export const InputHandlerContext = createContext<InputHandlerContextState>({
   input: "",
   setInput: (_: string) => {},
-  handleSubmit: (_: MessageType["from"]) => {},
+  handleSubmit: (_: Message["from"]) => {},
 });
 
 export const InputHandlerProvider = ({ children }: PropsWithChildren) => {
@@ -15,7 +15,7 @@ export const InputHandlerProvider = ({ children }: PropsWithChildren) => {
   const { handleUserMessage } = useContext(LLMContext);
   const [input, setInput] = useState<string>("");
 
-  const handleSubmit = (from: MessageType["from"]) => {
+  const handleSubmit = (from: Message["from"]) => {
     // TODO: handle slash commands
 
     addMessage({

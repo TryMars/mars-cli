@@ -1,19 +1,19 @@
 import { createContext, PropsWithChildren, useState } from "react";
 import {
-  CreateMessageType,
-  MessageContextType,
+  CreateMessageProps,
+  Message,
+  MessageContextState,
 } from "./message_context_types.ts";
-import { MessageType } from "#components/message_list/message_list_types.ts";
 
-export const MessageContext = createContext<MessageContextType>({
+export const MessageContext = createContext<MessageContextState>({
   messages: [],
-  addMessage: (_: CreateMessageType) => {},
+  addMessage: (_: CreateMessageProps) => {},
 });
 
 export const MessageProvider = ({ children }: PropsWithChildren) => {
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
-  const pushMessage = (message: MessageType) => {
+  const pushMessage = (message: Message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
   };
 
@@ -21,21 +21,21 @@ export const MessageProvider = ({ children }: PropsWithChildren) => {
     content,
     from,
     state = "neutral",
-  }: CreateMessageType): MessageType => {
+  }: CreateMessageProps): Message => {
     return {
       id: `msg_${crypto.randomUUID()}`,
       content,
       from,
       state,
       timestamp: new Date(),
-    } as MessageType;
+    } as Message;
   };
 
   const addMessage = ({
     content,
     from,
     state = "neutral",
-  }: CreateMessageType) => {
+  }: CreateMessageProps) => {
     const message = createMessage({ content, from, state });
 
     pushMessage(message);

@@ -12,6 +12,7 @@
   "imports": {
     "#components/": "./src/components/",
     "#context/": "./src/context/",
+    "#services/": "./src/services/",
     "#shared/": "./src/shared/",
 
     "@std/assert": "jsr:@std/assert@1",

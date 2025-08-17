@@ -1,10 +1,11 @@
-import { describe, it } from "@std/testing/bdd";
+import { afterAll, beforeAll, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
 import { App } from "#components/app/app.tsx";
 import { render } from "ink-testing-library";
 import { headlessModeText } from "#components/mars/mars.tsx";
 import { inputBoxPlaceholderText } from "#components/input_box/input_box.tsx";
 import { llmMockResponse } from "#context/llm_context/llm_context.tsx";
+import { ChatService } from "#services/chat_service/chat_service.ts";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -37,6 +38,16 @@ describe(
     });
 
     describe("app", () => {
+      const chatService = new ChatService();
+
+      beforeAll(async () => {
+        await chatService.initialize();
+      });
+
+      afterAll(async () => {
+        await chatService.cleanup();
+      });
+
       describe("headless mode", () => {
         it("enters in headed mode by default", () => {
           const marsApp = <App />;
