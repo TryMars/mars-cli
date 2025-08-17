@@ -1,1 +1,3 @@
-export type ChatContextState = {};
+export type ChatContextState = {
+  assistantModel: string;
+};

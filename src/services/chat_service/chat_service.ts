@@ -3,6 +3,8 @@ import { exists, ensureDir } from "@std/fs";
 import { envInTestMode, getHomeDir } from "#shared/utils/utils.ts";
 import { Config } from "./chat_service_types.ts";
 
+export const defaultAssistantModel = "claude4-sonnet";
+
 export class ChatService {
   public marsDirName: string;
   public marsDir: string;
@@ -45,9 +47,9 @@ export class ChatService {
     } catch {
       // return default config if file doesn't exist or is corrupted
       return {
-        currentModel: "claude4-sonnet",
+        currentModel: defaultAssistantModel,
         lastUsedChat: null,
-        defaultModel: "claude4-sonnet",
+        defaultModel: defaultAssistantModel,
       };
     }
   }

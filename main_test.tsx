@@ -5,7 +5,10 @@ import { render } from "ink-testing-library";
 import { headlessModeText } from "#components/mars/mars.tsx";
 import { inputBoxPlaceholderText } from "#components/input_box/input_box.tsx";
 import { llmMockResponse } from "#context/llm_context/llm_context.tsx";
-import { ChatService } from "#services/chat_service/chat_service.ts";
+import {
+  ChatService,
+  defaultAssistantModel,
+} from "#services/chat_service/chat_service.ts";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -108,6 +111,10 @@ describe(
             // we should also see the input as it should be displayed in the
             // message list component with the "> " prefix
             expect(lastFrame()).toContain(`> ${input}`);
+          });
+
+          it("displays current llm", () => {
+            expect(lastFrame()).toContain(defaultAssistantModel);
           });
 
           it("displays loading indicator", () => {
