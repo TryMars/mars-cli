@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, PropsWithChildren, useState } from "react";
 import {
   CreateMessageType,
   MessageContextType,
@@ -10,7 +10,7 @@ export const MessageContext = createContext<MessageContextType>({
   addMessage: (_: CreateMessageType) => {},
 });
 
-export const MessageProvider = ({ children }: { children: ReactNode }) => {
+export const MessageProvider = ({ children }: PropsWithChildren) => {
   const [messages, setMessages] = useState<MessageType[]>([]);
 
   /**

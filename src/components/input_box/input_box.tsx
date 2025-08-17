@@ -1,28 +1,13 @@
 import { Box, Text } from "ink";
 import TextInput from "ink-text-input";
-import { useContext, useState } from "react";
-import { MessageContext } from "#context/message_context/message_context.tsx";
+import { useContext } from "react";
+import { InputHandlerContext } from "#context/input_handler_context/input_handler_context.tsx";
 
 export const inputBoxPlaceholderText: string =
   "Type your request or use /help for commands";
 
 export const InputBox = () => {
-  const { addMessage } = useContext(MessageContext);
-  const [input, setInput] = useState<string>("");
-
-  /**
-   * Processes user input submission by creating a new message from the current
-   * input value and adding it to the message list. After submission, clears
-   * the input field to prepare for the next user input.
-   */
-  const handleSubmit = () => {
-    addMessage({
-      content: input,
-      from: "user",
-    });
-
-    setInput("");
-  };
+  const { input, setInput, handleSubmit } = useContext(InputHandlerContext);
 
   return (
     <>
@@ -39,7 +24,7 @@ export const InputBox = () => {
           <TextInput
             value={input}
             onChange={setInput}
-            onSubmit={handleSubmit}
+            onSubmit={() => handleSubmit("user")}
             placeholder={inputBoxPlaceholderText}
             showCursor
           />
