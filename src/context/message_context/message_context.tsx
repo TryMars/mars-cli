@@ -13,18 +13,10 @@ export const MessageContext = createContext<MessageContextType>({
 export const MessageProvider = ({ children }: PropsWithChildren) => {
   const [messages, setMessages] = useState<MessageType[]>([]);
 
-  /**
-   * Pushes a new message to the message list using a functional update
-   * to prevent race conditions
-   */
   const pushMessage = (message: MessageType) => {
     setMessages((prevMessages) => [...prevMessages, message]);
   };
 
-  /**
-   * Creates a new message with a unique ID and automatically
-   * generated timestamp
-   */
   const createMessage = ({
     content,
     from,
@@ -39,10 +31,6 @@ export const MessageProvider = ({ children }: PropsWithChildren) => {
     } as MessageType;
   };
 
-  /**
-   * Public facing method that creates the message object
-   * properly, and then pushes it to the message list
-   */
   const addMessage = ({
     content,
     from,

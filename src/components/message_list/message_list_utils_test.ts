@@ -5,7 +5,7 @@ import { PropsWithChildren, ReactElement } from "react";
 import { Text } from "ink";
 import { TextProps } from "ink";
 
-describe("message list unit tests", () => {
+describe("message list utils", () => {
   describe("getMessageColor", () => {
     it("returns green for a success state", () => {
       const color = getMessageColor("success");

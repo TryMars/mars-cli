@@ -2,9 +2,6 @@ import { ReactElement } from "react";
 import { MessageType } from "./message_list_types.ts";
 import { Text } from "ink";
 
-/**
- * Determines the text color based on the message state
- */
 export const getMessageColor = (state: MessageType["state"]): string => {
   if (state === "success") return "green";
   if (state === "warning") return "yellow";
@@ -13,10 +10,6 @@ export const getMessageColor = (state: MessageType["state"]): string => {
   return "";
 };
 
-/**
- * Returns the prefix element to display before each
- * message based on sender
- */
 export const getMessagePrefix = (
   from: MessageType["from"],
 ): string | ReactElement<Text> => {
