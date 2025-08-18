@@ -12,7 +12,7 @@ export const LoadingIndicator = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setElapsedTime(calculateElapsedSeconds(startTime));
+      setElapsedTime(calculateElapsedSeconds({ startTime }));
     }, 1000);
 
     return () => clearInterval(interval);

@@ -1,9 +1,15 @@
 import { expect } from "@std/expect";
 import { exists } from "@std/fs";
 import { join } from "@std/path";
-import { ChatService } from "./chat_service.ts";
+import {
+  ChatService,
+  defaultAssistantProviderId,
+  defaultAssistantModelId,
+  defaultAssistantModelName,
+} from "./chat_service.ts";
 import { describe, it } from "@std/testing/bdd";
 import { getHomeDir } from "#shared/utils/utils.ts";
+import { Config } from "./chat_service_types.ts";
 
 describe("chat service", () => {
   const chatService = new ChatService();
@@ -37,8 +43,12 @@ describe("chat service", () => {
 
     const config = await chatService.loadConfig();
 
-    expect(config.currentModel).toBe("claude4-sonnet");
-    expect(config.defaultModel).toBe("claude4-sonnet");
+    expect(config.currentModel.id).toBe(defaultAssistantModelId);
+    expect(config.currentModel.name).toBe(defaultAssistantModelName);
+
+    expect(config.defaultModel.id).toBe(defaultAssistantModelId);
+    expect(config.defaultModel.name).toBe(defaultAssistantModelName);
+
     expect(config.lastUsedChat).toBeNull();
 
     await chatService.cleanup();
@@ -47,19 +57,30 @@ describe("chat service", () => {
   it("returns default config when file doesn't exist", async () => {
     const config = await chatService.loadConfig();
 
-    expect(config.currentModel).toBe("claude4-sonnet");
-    expect(config.defaultModel).toBe("claude4-sonnet");
+    expect(config.currentModel.id).toBe(defaultAssistantModelId);
+    expect(config.currentModel.name).toBe(defaultAssistantModelName);
+
+    expect(config.defaultModel.id).toBe(defaultAssistantModelId);
+    expect(config.defaultModel.name).toBe(defaultAssistantModelName);
+
     expect(config.lastUsedChat).toBeNull();
   });
 
   it("loads existing config correctly", async () => {
     await chatService.initialize();
 
-    const testConfig = {
-      currentModel: "test-model",
-      defaultModel: "default-model",
-      lastUsedChat: "test-chat",
+    const testModel = {
+      id: "test-model-12345",
+      name: "Test Model",
     };
+
+    const testConfig = {
+      currentProviderId: defaultAssistantProviderId,
+      currentModel: testModel,
+      defaultProviderId: defaultAssistantProviderId,
+      defaultModel: testModel,
+      lastUsedChat: "test-chat",
+    } as Config;
 
     await chatService.saveConfig(testConfig);
     const loadedConfig = await chatService.loadConfig();

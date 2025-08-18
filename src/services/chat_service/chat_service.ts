@@ -2,8 +2,11 @@ import { join } from "@std/path";
 import { exists, ensureDir } from "@std/fs";
 import { envInTestMode, getHomeDir } from "#shared/utils/utils.ts";
 import { Config } from "./chat_service_types.ts";
+import { findModelById } from "#agents/agents.ts";
 
-export const defaultAssistantModel = "claude4-sonnet";
+export const defaultAssistantModelId = "claude-sonnet-4-20250514";
+export const defaultAssistantModelName = "Claude Sonnet 4";
+export const defaultAssistantProviderId = "anthropic";
 
 export class ChatService {
   public marsDirName: string;
@@ -33,10 +36,19 @@ export class ChatService {
 
   async createDefaultConfig() {
     const defaultConfig: Config = {
-      currentModel: "claude4-sonnet",
+      currentProviderId: defaultAssistantProviderId,
+      currentModel: findModelById({
+        providerId: defaultAssistantProviderId,
+        modelId: defaultAssistantModelId,
+      }),
+      defaultProviderId: defaultAssistantProviderId,
+      defaultModel: findModelById({
+        providerId: defaultAssistantProviderId,
+        modelId: defaultAssistantModelId,
+      }),
       lastUsedChat: null,
-      defaultModel: "claude4-sonnet",
     };
+
     await this.saveConfig(defaultConfig);
   }
 
@@ -47,9 +59,17 @@ export class ChatService {
     } catch {
       // return default config if file doesn't exist or is corrupted
       return {
-        currentModel: defaultAssistantModel,
+        currentProviderId: defaultAssistantProviderId,
+        currentModel: findModelById({
+          providerId: defaultAssistantProviderId,
+          modelId: defaultAssistantModelId,
+        }),
+        defaultProviderId: defaultAssistantProviderId,
+        defaultModel: findModelById({
+          providerId: defaultAssistantProviderId,
+          modelId: defaultAssistantModelId,
+        }),
         lastUsedChat: null,
-        defaultModel: defaultAssistantModel,
       };
     }
   }

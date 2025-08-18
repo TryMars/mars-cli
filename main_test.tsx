@@ -5,7 +5,7 @@ import { render } from "ink-testing-library";
 import { headlessModeText } from "#components/mars/mars.tsx";
 import { inputBoxPlaceholderText } from "#components/input_box/input_box.tsx";
 import { llmMockResponse } from "#context/llm_context/llm_context.tsx";
-import { defaultAssistantModel } from "#services/chat_service/chat_service.ts";
+import { defaultAssistantModelName } from "#services/chat_service/chat_service.ts";
 import { exists } from "@std/fs";
 
 const runCLI = async (
@@ -114,7 +114,7 @@ describe(
           });
 
           it("displays current llm", () => {
-            expect(lastFrame()).toContain(defaultAssistantModel);
+            expect(lastFrame()).toContain(defaultAssistantModelName);
           });
 
           it("displays loading indicator", () => {

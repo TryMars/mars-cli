@@ -1,5 +1,5 @@
-import { AgentInterface } from "#agents/agent_interface.ts";
 import { ProviderWithModels } from "#agents/agent_types.ts";
+import { AgentInterface } from "#agents/agent_interface.ts";
 
 export class Anthropic implements AgentInterface {
   getProviderWithModels(): ProviderWithModels {
