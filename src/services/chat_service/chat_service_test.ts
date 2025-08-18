@@ -12,7 +12,7 @@ import { getHomeDir } from "#shared/utils/utils.ts";
 import { Config } from "./chat_service_types.ts";
 
 describe("chat service", () => {
-  const chatService = new ChatService();
+  const chatService = ChatService.getInstance();
 
   it("initializes paths correctly", () => {
     const homeDir = getHomeDir();

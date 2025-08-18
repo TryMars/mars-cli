@@ -13,7 +13,7 @@ export const ChatContext = createContext<ChatContextState>({
 });
 
 export const ChatProvider = ({ children }: PropsWithChildren) => {
-  const [chatService] = useState<ChatService>(new ChatService());
+  const [chatService] = useState<ChatService>(ChatService.getInstance());
   const [assistantModel, setAssistantModel] = useState<Model>(
     findModelById({
       providerId: defaultAssistantProviderId,

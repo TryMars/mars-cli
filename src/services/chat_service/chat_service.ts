@@ -9,13 +9,15 @@ export const defaultAssistantModelName = "Claude Sonnet 4";
 export const defaultAssistantProviderId = "anthropic";
 
 export class ChatService {
-  public marsDirName: string;
-  public marsDir: string;
-  public chatsDir: string;
-  public configPath: string;
-  public backupsDir: string;
+  private static instance: ChatService;
 
-  constructor() {
+  marsDirName: string;
+  marsDir: string;
+  chatsDir: string;
+  configPath: string;
+  backupsDir: string;
+
+  private constructor() {
     const homeDir = getHomeDir();
 
     this.marsDirName = ".mars-new"; // TODO: change to .mars
@@ -23,6 +25,14 @@ export class ChatService {
     this.chatsDir = join(this.marsDir, "chats");
     this.configPath = join(this.marsDir, "config.json");
     this.backupsDir = join(this.marsDir, "backups");
+  }
+
+  static getInstance(): ChatService {
+    if (!ChatService.instance) {
+      ChatService.instance = new ChatService();
+    }
+
+    return ChatService.instance;
   }
 
   async initialize(): Promise<void> {
