@@ -1,8 +1,40 @@
-import { ProviderWithModels } from "#agents/agent_types.ts";
+import {
+  ProviderWithModels,
+  StreamResponseProps,
+} from "#agents/agent_types.ts";
 import { AgentInterface } from "#agents/agent_interface.ts";
+import { Anthropic as AnthropicClient } from "@anthropic-ai/sdk";
 
 export class Anthropic implements AgentInterface {
-  getProviderWithModels(): ProviderWithModels {
+  private static instance: Anthropic;
+
+  private client: AnthropicClient;
+  private modelId: string;
+
+  private constructor(modelId: string) {
+    this.modelId = modelId;
+    this.client = new AnthropicClient();
+  }
+
+  static getInstance(modelId: string): Anthropic {
+    if (!Anthropic.instance) {
+      const model = Anthropic.getProviderWithModels().models.find(
+        (model) => model.id === modelId,
+      );
+
+      if (!model) {
+        throw new TypeError(
+          `The model you are searching for cannot be found: ${modelId}`,
+        );
+      }
+
+      Anthropic.instance = new Anthropic(modelId);
+    }
+
+    return Anthropic.instance;
+  }
+
+  static getProviderWithModels(): ProviderWithModels {
     return {
       id: "anthropic",
       name: "Anthropic",
@@ -45,5 +77,49 @@ export class Anthropic implements AgentInterface {
         },
       ],
     };
+  }
+
+  async getStreamedEvents(content: string) {
+    return await this.client.messages.create({
+      max_tokens: 1024,
+      messages: [{ role: "user", content }],
+      model: this.modelId,
+      stream: true,
+    });
+  }
+
+  async streamResponse({
+    content,
+    addMessage,
+    setCurrentlyStreamedMessage,
+    setIsLoading,
+  }: StreamResponseProps) {
+    let message: string = "";
+
+    const stream = await this.getStreamedEvents(content);
+
+    for await (const messageStreamEvent of stream) {
+      if (
+        messageStreamEvent.type === "content_block_delta" &&
+        messageStreamEvent.delta.type === "text_delta"
+      ) {
+        message += messageStreamEvent.delta.text;
+
+        setCurrentlyStreamedMessage(message);
+      }
+
+      if (messageStreamEvent.type === "message_delta" && message) {
+        setCurrentlyStreamedMessage("");
+
+        addMessage({
+          content: message,
+          from: "assistant",
+        });
+
+        message = "";
+      }
+    }
+
+    setIsLoading(false);
   }
 }

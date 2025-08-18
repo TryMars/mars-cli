@@ -7,11 +7,15 @@ import {
 
 export const MessageContext = createContext<MessageContextState>({
   messages: [],
-  addMessage: (_: CreateMessageProps) => {},
+  addMessage: (_) => {},
+  currentlyStreamedMessage: "",
+  setCurrentlyStreamedMessage: (_) => {},
 });
 
 export const MessageProvider = ({ children }: PropsWithChildren) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [currentlyStreamedMessage, setCurrentlyStreamedMessage] =
+    useState<string>("");
 
   const pushMessage = (message: Message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
@@ -42,7 +46,14 @@ export const MessageProvider = ({ children }: PropsWithChildren) => {
   };
 
   return (
-    <MessageContext.Provider value={{ messages, addMessage }}>
+    <MessageContext.Provider
+      value={{
+        messages,
+        addMessage,
+        currentlyStreamedMessage,
+        setCurrentlyStreamedMessage,
+      }}
+    >
       {children}
     </MessageContext.Provider>
   );

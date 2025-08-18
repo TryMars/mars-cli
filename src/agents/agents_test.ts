@@ -1,14 +1,22 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { findModelById, getAvailableModels } from "./agents.ts";
+import {
+  findModelById,
+  getAgentInstanceByProviderId,
+  getAvailableModels,
+} from "./agents.ts";
 import { Anthropic } from "./providers/anthropic.ts";
+import {
+  defaultAssistantModelId,
+  defaultAssistantProviderId,
+} from "#services/chat_service/chat_service.ts";
 
 describe("agents", () => {
   const availableModels = getAvailableModels();
 
   describe("getAvailableModels", () => {
     it("includes anthropic", () => {
-      const anthropicModels = new Anthropic().getProviderWithModels();
+      const anthropicModels = Anthropic.getProviderWithModels();
 
       expect(availableModels).toContainEqual(anthropicModels);
     });
@@ -43,6 +51,26 @@ describe("agents", () => {
           modelId: "test-model",
         }),
       ).toThrow("test-model");
+    });
+  });
+
+  describe("getAgentInstanceByProviderId", () => {
+    it("returns instance of agent", () => {
+      const agent = getAgentInstanceByProviderId({
+        providerId: defaultAssistantProviderId,
+        modelId: defaultAssistantModelId,
+      });
+
+      expect(agent).toEqual(Anthropic.getInstance(defaultAssistantModelId));
+    });
+
+    it("returns error if provider doesnt exist", () => {
+      expect(() =>
+        getAgentInstanceByProviderId({
+          providerId: "test-provider-12345",
+          modelId: defaultAssistantModelId,
+        }),
+      ).toThrow("test-provider-12345");
     });
   });
 });

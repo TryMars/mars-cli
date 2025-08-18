@@ -1,6 +1,8 @@
 export type MessageContextState = {
   messages: Message[];
   addMessage: (_: CreateMessageProps) => void;
+  currentlyStreamedMessage: string;
+  setCurrentlyStreamedMessage: (content: string) => void;
 };
 
 export type CreateMessageProps = {

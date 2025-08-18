@@ -10,6 +10,7 @@ import { findModelById } from "#agents/agents.ts";
 
 export const ChatContext = createContext<ChatContextState>({
   assistantModel: {} as Model,
+  assistantProviderId: "",
 });
 
 export const ChatProvider = ({ children }: PropsWithChildren) => {
@@ -20,19 +21,25 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
       modelId: defaultAssistantModelId,
     }),
   );
+  const [assistantProviderId, setAssistantProviderId] = useState<string>(
+    defaultAssistantProviderId,
+  );
 
   useEffect(() => {
     const initializeChatService = async () => {
       await chatService.initialize();
 
-      setAssistantModel((await chatService.loadConfig()).currentModel);
+      const config = await chatService.loadConfig();
+
+      setAssistantModel(config.currentModel);
+      setAssistantProviderId(config.currentProviderId);
     };
 
     initializeChatService();
   }, [chatService]);
 
   return (
-    <ChatContext.Provider value={{ assistantModel }}>
+    <ChatContext.Provider value={{ assistantModel, assistantProviderId }}>
       {children}
     </ChatContext.Provider>
   );

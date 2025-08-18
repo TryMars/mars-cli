@@ -14,7 +14,9 @@
     "jsr:@std/internal@^1.0.9": "1.0.10",
     "jsr:@std/path@1": "1.1.2",
     "jsr:@std/path@^1.1.1": "1.1.2",
+    "jsr:@std/testing@*": "1.0.15",
     "jsr:@std/testing@^1.0.15": "1.0.15",
+    "npm:@anthropic-ai/sdk@0.60": "0.60.0",
     "npm:@types/node@*": "22.14.1",
     "npm:@types/react@^19.1.10": "19.1.10",
     "npm:ink-spinner@5": "5.0.0_ink@6.2.0__@types+react@19.1.10__react@19.1.1_react@19.1.1_@types+react@19.1.10",
@@ -90,6 +92,10 @@
         "ansi-styles",
         "is-fullwidth-code-point@4.0.0"
       ]
+    },
+    "@anthropic-ai/sdk@0.60.0": {
+      "integrity": "sha512-9zu/TXaUy8BZhXedDtt1wT3H4LOlpKDO1/ftiFpeR3N1PCr3KJFKkxxlQWWt1NNp08xSwUNJ3JNY8yhl8av6eQ==",
+      "bin": true
     },
     "@types/node@22.14.1": {
       "integrity": "sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==",
@@ -362,6 +368,7 @@
       "jsr:@std/fs@1",
       "jsr:@std/path@1",
       "jsr:@std/testing@^1.0.15",
+      "npm:@anthropic-ai/sdk@0.60",
       "npm:@types/react@^19.1.10",
       "npm:ink-spinner@5",
       "npm:ink-testing-library@4",

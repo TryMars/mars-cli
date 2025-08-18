@@ -4,9 +4,15 @@ import { App } from "#components/app/app.tsx";
 import { render } from "ink-testing-library";
 import { headlessModeText } from "#components/mars/mars.tsx";
 import { inputBoxPlaceholderText } from "#components/input_box/input_box.tsx";
-import { llmMockResponse } from "#context/llm_context/llm_context.tsx";
-import { defaultAssistantModelName } from "#services/chat_service/chat_service.ts";
+import {
+  defaultAssistantModelId,
+  defaultAssistantModelName,
+  defaultAssistantProviderId,
+} from "#services/chat_service/chat_service.ts";
 import { exists } from "@std/fs";
+import { getAgentInstanceByProviderId } from "#agents/agents.ts";
+import { ANY_TODO } from "#shared/types.ts";
+import { stub } from "jsr:@std/testing/mock";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -91,6 +97,34 @@ describe(
         });
 
         describe("user input", () => {
+          const agent = getAgentInstanceByProviderId({
+            providerId: defaultAssistantProviderId,
+            modelId: defaultAssistantModelId,
+          });
+
+          const mockedResponseContent1 = "Hello! This is ";
+          const mockedResponseContent2 = "mocked content.";
+
+          stub(agent, "getStreamedEvents", () => {
+            return Promise.resolve([
+              {
+                type: "content_block_delta",
+                delta: {
+                  type: "text_delta",
+                  text: mockedResponseContent1,
+                },
+              },
+              {
+                type: "content_block_delta",
+                delta: {
+                  type: "text_delta",
+                  text: mockedResponseContent2,
+                },
+              },
+              { type: "message_delta" },
+            ]) as ANY_TODO;
+          });
+
           it("handles submitting", () => {
             stdin.write(input);
             rerender(marsApp);
@@ -122,14 +156,11 @@ describe(
           });
 
           it("receives response from llm", () => {
-            setTimeout(() => {
-              // wait for the loading indicator to dissapear then rerender
-              rerender(marsApp);
+            rerender(marsApp);
 
-              // we should see the llm mock response in the message
-              // list with the ⏺ prefix
-              expect(lastFrame()).toContain(`⏺  ${llmMockResponse}`);
-            }, 1);
+            expect(lastFrame()).toContain(
+              "⏺ " + mockedResponseContent1 + mockedResponseContent2,
+            );
           });
         });
 
