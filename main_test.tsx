@@ -5,10 +5,8 @@ import { render } from "ink-testing-library";
 import { headlessModeText } from "#components/mars/mars.tsx";
 import { inputBoxPlaceholderText } from "#components/input_box/input_box.tsx";
 import { llmMockResponse } from "#context/llm_context/llm_context.tsx";
-import {
-  ChatService,
-  defaultAssistantModel,
-} from "#services/chat_service/chat_service.ts";
+import { defaultAssistantModel } from "#services/chat_service/chat_service.ts";
+import { exists } from "@std/fs";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -23,9 +21,7 @@ const runCLI = async (
   const child = process.spawn();
   child.stdin.close();
 
-  const output = await child.output();
-
-  return output;
+  return await child.output();
 };
 
 describe(
@@ -41,14 +37,18 @@ describe(
     });
 
     describe("app", () => {
-      const chatService = new ChatService();
+      const testMarsDir = `${Deno.cwd()}/tests/storage/.mars`;
 
       beforeAll(async () => {
-        await chatService.initialize();
+        if (await exists(testMarsDir)) {
+          await Deno.remove(testMarsDir);
+        }
       });
 
       afterAll(async () => {
-        await chatService.cleanup();
+        if (await exists(testMarsDir)) {
+          await Deno.remove(testMarsDir);
+        }
       });
 
       describe("headless mode", () => {

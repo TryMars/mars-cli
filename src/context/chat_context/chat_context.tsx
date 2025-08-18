@@ -4,7 +4,6 @@ import {
   defaultAssistantModel,
 } from "#services/chat_service/chat_service.ts";
 import { ChatContextState } from "./chat_context_types.ts";
-import { envInTestMode } from "#shared/utils/utils.ts";
 
 export const ChatContext = createContext<ChatContextState>({
   assistantModel: "",
@@ -23,9 +22,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
       setAssistantModel((await chatService.loadConfig()).currentModel);
     };
 
-    if (!envInTestMode()) {
-      initializeChatService();
-    }
+    initializeChatService();
   }, [chatService]);
 
   return (
