@@ -4,9 +4,11 @@ import {
 } from "#agents/agent_types.ts";
 import { AgentInterface } from "#agents/agent_interface.ts";
 import { Anthropic as AnthropicClient } from "@anthropic-ai/sdk";
+import { agentsMessages } from "#agents/agents_messages.ts";
+import { envInTestMode } from "#shared/utils/utils.ts";
 
 export class Anthropic implements AgentInterface {
-  private static instance: Anthropic;
+  private static instance: Anthropic | null;
 
   private client: AnthropicClient;
   private modelId: string;
@@ -23,9 +25,7 @@ export class Anthropic implements AgentInterface {
       );
 
       if (!model) {
-        throw new TypeError(
-          `The model you are searching for cannot be found: ${modelId}`,
-        );
+        throw new TypeError(agentsMessages.error.model_not_found(modelId));
       }
 
       Anthropic.instance = new Anthropic(modelId);
@@ -121,5 +121,15 @@ export class Anthropic implements AgentInterface {
     }
 
     setIsLoading(false);
+  }
+
+  static cleanup(): void {
+    if (!envInTestMode()) {
+      throw new TypeError(agentsMessages.error.cleanup_not_in_test_mode());
+    }
+
+    if (Anthropic.instance) {
+      Anthropic.instance = null;
+    }
   }
 }

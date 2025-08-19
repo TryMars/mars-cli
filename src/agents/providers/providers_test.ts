@@ -1,5 +1,5 @@
 import { describe, it } from "@std/testing/bdd";
-import { getAgentInstanceByProviderId } from "../agents.ts";
+import { getAgentInstanceByProviderId } from "#agents/agents.ts";
 import {
   defaultAssistantModelId,
   defaultAssistantProviderId,
@@ -8,8 +8,52 @@ import { CreateMessageProps } from "#context/message_context/message_context_typ
 import { stub } from "jsr:@std/testing/mock";
 import { ANY_TODO } from "#shared/types.ts";
 import { expect } from "@std/expect/expect";
+import { Anthropic } from "./anthropic.ts";
+import { agentsMessages } from "#agents/agents_messages.ts";
 
 describe("providers", () => {
+  describe("getInstance", () => {
+    it("can get a new singleton instance", () => {
+      Anthropic.cleanup();
+
+      expect(() =>
+        Anthropic.getInstance(defaultAssistantModelId),
+      ).not.toThrow();
+    });
+
+    it("throws error if model doesnt exist", () => {
+      const testModel = "test-model";
+
+      Anthropic.cleanup();
+
+      expect(() => Anthropic.getInstance(testModel)).toThrow(
+        agentsMessages.error.model_not_found(testModel),
+      );
+    });
+  });
+
+  describe("cleanup", () => {
+    it("can clean up in test mode", () => {
+      expect(() => Anthropic.cleanup()).not.toThrow();
+    });
+
+    it("throws error if not in test mode", () => {
+      // Mock APP_MODE to be production
+      const envStub = stub(Deno.env, "get", (key: string) => {
+        if (key === "APP_MODE") return "production";
+        return Deno.env.get.call(Deno.env, key);
+      });
+
+      try {
+        expect(() => Anthropic.cleanup()).toThrow(
+          agentsMessages.error.cleanup_not_in_test_mode(),
+        );
+      } finally {
+        envStub.restore();
+      }
+    });
+  });
+
   describe("streamResponse", () => {
     const agent = getAgentInstanceByProviderId({
       providerId: defaultAssistantProviderId,

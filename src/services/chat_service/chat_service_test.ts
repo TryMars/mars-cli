@@ -10,6 +10,8 @@ import {
 import { describe, it } from "@std/testing/bdd";
 import { getHomeDir } from "#shared/utils/utils.ts";
 import { Config } from "./chat_service_types.ts";
+import { chatServiceMessages } from "./chat_service_messages.ts";
+import { stub } from "jsr:@std/testing/mock";
 
 describe("chat service", () => {
   const chatService = ChatService.getInstance();
@@ -101,8 +103,18 @@ describe("chat service", () => {
   });
 
   it("cleanup only works in test mode", async () => {
-    Deno.env.set("APP_MODE", "production");
+    // Mock APP_MODE to be production
+    const envStub = stub(Deno.env, "get", (key: string) => {
+      if (key === "APP_MODE") return "production";
+      return Deno.env.get.call(Deno.env, key);
+    });
 
-    await expect(chatService.cleanup()).rejects.toThrow();
+    try {
+      await expect(chatService.cleanup()).rejects.toThrow(
+        chatServiceMessages.error.cleanup_not_in_test_mode(),
+      );
+    } finally {
+      envStub.restore();
+    }
   });
 });

@@ -10,6 +10,7 @@ import {
   defaultAssistantModelId,
   defaultAssistantProviderId,
 } from "#services/chat_service/chat_service.ts";
+import { agentsMessages } from "./agents_messages.ts";
 
 describe("agents", () => {
   const availableModels = getAvailableModels();
@@ -36,21 +37,25 @@ describe("agents", () => {
     });
 
     it("throws error if provider doesnt exist", () => {
+      const testProvider = "test-provider";
+
       expect(() =>
         findModelById({
-          providerId: "test-provider",
+          providerId: testProvider,
           modelId: "test-model",
         }),
-      ).toThrow("test-provider");
+      ).toThrow(agentsMessages.error.provider_not_found(testProvider));
     });
 
     it("throws error if model doesnt exist", () => {
+      const testModel = "test-model";
+
       expect(() =>
         findModelById({
           providerId: "anthropic",
-          modelId: "test-model",
+          modelId: testModel,
         }),
-      ).toThrow("test-model");
+      ).toThrow(agentsMessages.error.model_not_found(testModel));
     });
   });
 
@@ -65,12 +70,14 @@ describe("agents", () => {
     });
 
     it("returns error if provider doesnt exist", () => {
+      const testProvider = "test-provider-12345";
+
       expect(() =>
         getAgentInstanceByProviderId({
-          providerId: "test-provider-12345",
+          providerId: testProvider,
           modelId: defaultAssistantModelId,
         }),
-      ).toThrow("test-provider-12345");
+      ).toThrow(agentsMessages.error.provider_not_found(testProvider));
     });
   });
 });

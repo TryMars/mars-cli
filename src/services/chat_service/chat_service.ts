@@ -3,6 +3,7 @@ import { exists, ensureDir } from "@std/fs";
 import { envInTestMode, getHomeDir } from "#shared/utils/utils.ts";
 import { Config } from "./chat_service_types.ts";
 import { findModelById } from "#agents/agents.ts";
+import { chatServiceMessages } from "./chat_service_messages.ts";
 
 export const defaultAssistantModelId = "claude-sonnet-4-20250514";
 export const defaultAssistantModelName = "Claude Sonnet 4";
@@ -90,7 +91,7 @@ export class ChatService {
 
   async cleanup(): Promise<void> {
     if (!envInTestMode()) {
-      throw new Error("Cannot run cleanup method if not in test mode");
+      throw new TypeError(chatServiceMessages.error.cleanup_not_in_test_mode());
     }
 
     try {

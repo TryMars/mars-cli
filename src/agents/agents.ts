@@ -4,6 +4,7 @@ import {
   ProviderIdAndModelIdProps,
   ProviderWithModels,
 } from "./agent_types.ts";
+import { agentsMessages } from "./agents_messages.ts";
 import { Anthropic } from "./providers/anthropic.ts";
 
 export const getAvailableModels = (): ProviderWithModels[] => {
@@ -19,17 +20,13 @@ export const findModelById = ({
   );
 
   if (provider === undefined) {
-    throw new TypeError(
-      `The provider you are searching for cannot be found: ${providerId}`,
-    );
+    throw new TypeError(agentsMessages.error.provider_not_found(providerId));
   }
 
   const model = provider.models.find((model) => model.id === modelId);
 
   if (model === undefined) {
-    throw new TypeError(
-      `The model you are searching for cannot be found: ${modelId}`,
-    );
+    throw new TypeError(agentsMessages.error.model_not_found(modelId));
   }
 
   return model;
@@ -43,8 +40,6 @@ export const getAgentInstanceByProviderId = ({
     case "anthropic":
       return Anthropic.getInstance(modelId);
     default:
-      throw new TypeError(
-        `The provider you are searching for cannot be found: ${providerId}`,
-      );
+      throw new TypeError(agentsMessages.error.provider_not_found(providerId));
   }
 };

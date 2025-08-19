@@ -3,9 +3,7 @@ import TextInput from "ink-text-input";
 import { useContext } from "react";
 import { InputHandlerContext } from "#context/input_handler_context/input_handler_context.tsx";
 import { ChatContext } from "#context/chat_context/chat_context.tsx";
-
-export const inputBoxPlaceholderText: string =
-  "Type your request or use /help for commands";
+import { inputBoxMessages } from "./input_box_messages.ts";
 
 export const InputBox = () => {
   const { assistantModel } = useContext(ChatContext);
@@ -27,7 +25,7 @@ export const InputBox = () => {
             value={input}
             onChange={setInput}
             onSubmit={() => handleSubmit("user")}
-            placeholder={inputBoxPlaceholderText}
+            placeholder={inputBoxMessages.input.placeholder()}
             showCursor
           />
         </Text>

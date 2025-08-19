@@ -2,8 +2,6 @@ import { afterAll, beforeAll, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect/expect";
 import { App } from "#components/app/app.tsx";
 import { render } from "ink-testing-library";
-import { headlessModeText } from "#components/mars/mars.tsx";
-import { inputBoxPlaceholderText } from "#components/input_box/input_box.tsx";
 import {
   defaultAssistantModelId,
   defaultAssistantModelName,
@@ -13,6 +11,8 @@ import { exists } from "@std/fs";
 import { getAgentInstanceByProviderId } from "#agents/agents.ts";
 import { ANY_TODO } from "#shared/types.ts";
 import { stub } from "jsr:@std/testing/mock";
+import { inputBoxMessages } from "#components/input_box/input_box_messages.ts";
+import { marsMessages } from "#components/mars/mars_messages.ts";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -64,7 +64,7 @@ describe(
           const { lastFrame, cleanup } = render(marsApp);
 
           // should not see a headless mode confirmation message
-          expect(lastFrame()).not.toContain(headlessModeText);
+          expect(lastFrame()).not.toContain(marsMessages.headless.enabled());
 
           cleanup();
         });
@@ -79,7 +79,7 @@ describe(
           rerender(marsApp);
 
           // should see a headless mode confirmation message
-          expect(lastFrame()).toContain(headlessModeText);
+          expect(lastFrame()).toContain(marsMessages.headless.enabled());
 
           cleanup();
         });
@@ -93,7 +93,7 @@ describe(
         it("renders input box", () => {
           // should see the placeholder text as our input box
           // should be empty at this point.
-          expect(lastFrame()).toContain(inputBoxPlaceholderText);
+          expect(lastFrame()).toContain(inputBoxMessages.input.placeholder());
         });
 
         describe("user input", () => {
@@ -129,7 +129,9 @@ describe(
             stdin.write(input);
             rerender(marsApp);
 
-            expect(lastFrame()).not.toContain(inputBoxPlaceholderText);
+            expect(lastFrame()).not.toContain(
+              inputBoxMessages.input.placeholder(),
+            );
             expect(lastFrame()).toContain(input);
 
             // \r is the equivalent of pressing "enter/return"
@@ -138,7 +140,7 @@ describe(
 
             // we should see the placeholder again since the input
             // box should be cleared after submit
-            expect(lastFrame()).toContain(inputBoxPlaceholderText);
+            expect(lastFrame()).toContain(inputBoxMessages.input.placeholder());
           });
 
           it("displays input", () => {
