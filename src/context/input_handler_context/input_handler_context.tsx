@@ -6,8 +6,8 @@ import { Message } from "#context/message_context/message_context_types.ts";
 
 export const InputHandlerContext = createContext<InputHandlerContextState>({
   input: "",
-  setInput: (_: string) => {},
-  handleSubmit: (_: Message["from"]) => {},
+  setInput: (_) => {},
+  handleSubmit: (_) => {},
 });
 
 export const InputHandlerProvider = ({ children }: PropsWithChildren) => {

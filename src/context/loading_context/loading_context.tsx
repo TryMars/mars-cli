@@ -3,7 +3,7 @@ import { LoadingContextState } from "./loading_context_types.ts";
 
 export const LoadingContext = createContext<LoadingContextState>({
   isLoading: false,
-  setIsLoading: (_: boolean) => {},
+  setIsLoading: (_) => {},
 });
 
 export const LoadingProvider = ({ children }: PropsWithChildren) => {

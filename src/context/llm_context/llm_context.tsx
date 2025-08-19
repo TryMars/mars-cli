@@ -13,7 +13,7 @@ import { ChatContext } from "#context/chat_context/chat_context.tsx";
 import { getAgentInstanceByProviderId } from "#agents/agents.ts";
 
 export const LLMContext = createContext<LLMContextState>({
-  handleUserMessage: (_: string) => {},
+  handleUserMessage: (_) => {},
 });
 
 export const llmMockResponse = "LLM integration coming soon...";
