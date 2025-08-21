@@ -13,7 +13,7 @@ export const InputBox = () => {
     <>
       <Box marginTop={1} flexDirection="row" justifyContent="space-between">
         <Text dimColor color="dim">
-          {assistantModel.name}
+          {assistantModel?.name ?? "..."}
         </Text>
         <Text color="magenta">{Deno.cwd()}</Text>
       </Box>

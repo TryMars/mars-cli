@@ -6,6 +6,7 @@ import { AgentInterface } from "#agents/agent_interface.ts";
 import { Anthropic as AnthropicClient } from "@anthropic-ai/sdk";
 import { agentsMessages } from "#agents/agents_messages.ts";
 import { envInTestMode } from "#shared/utils/utils.ts";
+import { Message } from "#context/message_context/message_context_types.ts";
 
 export class Anthropic implements AgentInterface {
   private static instance: Anthropic | null;
@@ -79,10 +80,20 @@ export class Anthropic implements AgentInterface {
     };
   }
 
-  async getStreamedEvents(content: string) {
+  convertToLLMMessages(messages: Message[]): AnthropicClient.MessageParam[] {
+    return messages.map((message) => ({
+      role: message.from as "user" | "assistant",
+      content: message.content,
+    }));
+  }
+
+  async getStreamedEvents(content: string, messages: Message[] = []) {
     return await this.client.messages.create({
       max_tokens: 1024,
-      messages: [{ role: "user", content }],
+      messages: [
+        ...this.convertToLLMMessages(messages),
+        { role: "user", content },
+      ],
       model: this.modelId,
       stream: true,
     });
@@ -90,13 +101,14 @@ export class Anthropic implements AgentInterface {
 
   async streamResponse({
     content,
+    messages,
     addMessage,
     setCurrentlyStreamedMessage,
     setIsLoading,
   }: StreamResponseProps) {
     let message: string = "";
 
-    const stream = await this.getStreamedEvents(content);
+    const stream = await this.getStreamedEvents(content, messages);
 
     for await (const messageStreamEvent of stream) {
       if (

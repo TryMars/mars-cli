@@ -5,7 +5,7 @@ import {
   getAgentInstanceByProviderId,
   getAvailableModels,
 } from "./agents.ts";
-import { Anthropic } from "./providers/anthropic.ts";
+import { Anthropic } from "./providers/anthropic/anthropic.ts";
 import {
   defaultAssistantModelId,
   defaultAssistantProviderId,

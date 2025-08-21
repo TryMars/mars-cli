@@ -5,7 +5,7 @@ import {
   ProviderWithModels,
 } from "./agent_types.ts";
 import { agentsMessages } from "./agents_messages.ts";
-import { Anthropic } from "./providers/anthropic.ts";
+import { Anthropic } from "./providers/anthropic/anthropic.ts";
 
 export const getAvailableModels = (): ProviderWithModels[] => {
   return [Anthropic.getProviderWithModels()];

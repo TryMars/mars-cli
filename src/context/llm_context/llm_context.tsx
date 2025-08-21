@@ -16,22 +16,22 @@ export const LLMContext = createContext<LLMContextState>({
   handleUserMessage: (_) => {},
 });
 
-export const llmMockResponse = "LLM integration coming soon...";
-
 export const LLMProvider = ({ children }: PropsWithChildren) => {
   const { setIsLoading } = useContext(LoadingContext);
-  const { addMessage, setCurrentlyStreamedMessage } =
+  const { messages, addMessage, setCurrentlyStreamedMessage } =
     useContext(MessageContext);
   const { assistantModel, assistantProviderId } = useContext(ChatContext);
   const [agent, setAgent] = useState<AgentInterface>();
 
   useEffect(() => {
-    setAgent(
-      getAgentInstanceByProviderId({
-        providerId: assistantProviderId,
-        modelId: assistantModel.id,
-      }),
-    );
+    if (assistantProviderId && assistantModel) {
+      setAgent(
+        getAgentInstanceByProviderId({
+          providerId: assistantProviderId,
+          modelId: assistantModel.id,
+        }),
+      );
+    }
   }, [assistantModel, assistantProviderId]);
 
   const handleUserMessage = async (content: string) => {
@@ -39,6 +39,7 @@ export const LLMProvider = ({ children }: PropsWithChildren) => {
 
     await agent?.streamResponse({
       content,
+      messages,
       addMessage,
       setCurrentlyStreamedMessage,
       setIsLoading,

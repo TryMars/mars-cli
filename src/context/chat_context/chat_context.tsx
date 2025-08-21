@@ -1,12 +1,7 @@
 import { createContext, PropsWithChildren, useEffect, useState } from "react";
-import {
-  ChatService,
-  defaultAssistantModelId,
-  defaultAssistantProviderId,
-} from "#services/chat_service/chat_service.ts";
+import { ChatService } from "#services/chat_service/chat_service.ts";
 import { ChatContextState } from "./chat_context_types.ts";
 import { Model } from "#agents/agent_types.ts";
-import { findModelById } from "#agents/agents.ts";
 
 export const ChatContext = createContext<ChatContextState>({
   assistantModel: {} as Model,
@@ -15,15 +10,8 @@ export const ChatContext = createContext<ChatContextState>({
 
 export const ChatProvider = ({ children }: PropsWithChildren) => {
   const [chatService] = useState<ChatService>(ChatService.getInstance());
-  const [assistantModel, setAssistantModel] = useState<Model>(
-    findModelById({
-      providerId: defaultAssistantProviderId,
-      modelId: defaultAssistantModelId,
-    }),
-  );
-  const [assistantProviderId, setAssistantProviderId] = useState<string>(
-    defaultAssistantProviderId,
-  );
+  const [assistantModel, setAssistantModel] = useState<Model>();
+  const [assistantProviderId, setAssistantProviderId] = useState<string>();
 
   useEffect(() => {
     const initializeChatService = async () => {

@@ -1,4 +1,7 @@
-import { MessageContextState } from "#context/message_context/message_context_types.ts";
+import {
+  Message,
+  MessageContextState,
+} from "#context/message_context/message_context_types.ts";
 import { LoadingContextState } from "#context/loading_context/loading_context_types.ts";
 
 export type Model = {
@@ -22,6 +25,7 @@ export type ProviderIdAndModelIdProps = {
 
 export type StreamResponseProps = {
   content: string;
+  messages: Message[];
   addMessage: MessageContextState["addMessage"];
   setCurrentlyStreamedMessage: MessageContextState["setCurrentlyStreamedMessage"];
   setIsLoading: LoadingContextState["setIsLoading"];
