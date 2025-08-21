@@ -1,10 +1,13 @@
-import { StreamResponseProps } from "./agent_types.ts";
+import { Model, StreamResponseProps } from "./agent_types.ts";
 
 export interface AgentInterface {
+  model: Model;
+
   streamResponse({
     content,
     addMessage,
     setCurrentlyStreamedMessage,
+    setContextWindowUsage,
     setIsLoading,
   }: StreamResponseProps): Promise<void>;
 

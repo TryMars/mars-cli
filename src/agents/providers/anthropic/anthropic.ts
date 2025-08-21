@@ -1,5 +1,7 @@
 import {
+  Model,
   ProviderWithModels,
+  SetContextWindowUsageProps,
   StreamResponseProps,
 } from "#agents/agent_types.ts";
 import { AgentInterface } from "#agents/agent_interface.ts";
@@ -10,12 +12,14 @@ import { Message } from "#context/message_context/message_context_types.ts";
 
 export class Anthropic implements AgentInterface {
   private static instance: Anthropic | null;
-
+  private static providerId: string = "anthropic";
   private client: AnthropicClient;
-  private modelId: string;
 
-  private constructor(modelId: string) {
-    this.modelId = modelId;
+  model: Model;
+
+  private constructor(model: Model) {
+    this.model = model;
+
     this.client = new AnthropicClient();
   }
 
@@ -29,7 +33,7 @@ export class Anthropic implements AgentInterface {
         throw new TypeError(agentsMessages.error.model_not_found(modelId));
       }
 
-      Anthropic.instance = new Anthropic(modelId);
+      Anthropic.instance = new Anthropic(model);
     }
 
     return Anthropic.instance;
@@ -37,44 +41,53 @@ export class Anthropic implements AgentInterface {
 
   static getProviderWithModels(): ProviderWithModels {
     return {
-      id: "anthropic",
+      id: Anthropic.providerId,
       name: "Anthropic",
       models: [
         {
           id: "claude-opus-4-1-20250805",
           name: "Claude Opus 4.1",
+          contextWindow: 200000,
         },
         {
           id: "claude-opus-4-20250514",
           name: "Claude Opus 4",
+          contextWindow: 200000,
         },
         {
           id: "claude-3-opus-20240229",
           name: "Claude Opus 3",
+          contextWindow: 200000,
         },
         {
           id: "claude-sonnet-4-20250514",
           name: "Claude Sonnet 4",
+          contextWindow: 200000,
         },
         {
           id: "claude-3-7-sonnet-20250219",
           name: "Claude Sonnet 3.7",
+          contextWindow: 200000,
         },
         {
           id: "claude-3-5-sonnet-20241022",
           name: "Claude Sonnet 3.5 v2",
+          contextWindow: 200000,
         },
         {
           id: "claude-3-5-sonnet-20240620",
           name: "Claude Sonnet 3.5",
+          contextWindow: 200000,
         },
         {
           id: "claude-3-haiku-20240307",
           name: "Claude Haiku 3",
+          contextWindow: 200000,
         },
         {
           id: "claude-3-5-haiku-20241022",
           name: "Claude Haiku 3.5",
+          contextWindow: 200000,
         },
       ],
     };
@@ -94,7 +107,7 @@ export class Anthropic implements AgentInterface {
         ...this.convertToLLMMessages(messages),
         { role: "user", content },
       ],
-      model: this.modelId,
+      model: this.model.id,
       stream: true,
     });
   }
@@ -104,6 +117,7 @@ export class Anthropic implements AgentInterface {
     messages,
     addMessage,
     setCurrentlyStreamedMessage,
+    setContextWindowUsage,
     setIsLoading,
   }: StreamResponseProps) {
     let message: string = "";
@@ -129,10 +143,33 @@ export class Anthropic implements AgentInterface {
         });
 
         message = "";
+
+        this.setContextWindowUsage({
+          setContextWindowUsage,
+          tokenUsage: messageStreamEvent.usage,
+        });
       }
     }
 
     setIsLoading(false);
+  }
+
+  private setContextWindowUsage({
+    setContextWindowUsage,
+    tokenUsage,
+  }: SetContextWindowUsageProps) {
+    const contextWindowUsage =
+      Number(tokenUsage.input_tokens) +
+      Number(tokenUsage.output_tokens) +
+      Number(tokenUsage.cache_read_input_tokens) +
+      Number(tokenUsage.cache_creation_input_tokens);
+
+    setContextWindowUsage(
+      Math.round((contextWindowUsage / this.model.contextWindow) * 100 * 10) /
+        10,
+    );
+
+    // TODO: check a threshhold, and if we are approaching that threshold, auto compact the context.
   }
 
   static cleanup(): void {

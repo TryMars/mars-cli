@@ -151,6 +151,7 @@ describe("anthropic", () => {
     let message: string = "";
     let currentlyStreamedMessage: string = "This should be empty at the end";
     let isLoading: boolean = true;
+    let contextWindowUsage: number = 0;
 
     const addMessage = (createMessage: CreateMessageProps) =>
       (message = createMessage.content);
@@ -159,6 +160,9 @@ describe("anthropic", () => {
       (currentlyStreamedMessage = content);
 
     const setIsLoading = (loading: boolean) => (isLoading = loading);
+
+    const setContextWindowUsage = (usage: number) =>
+      (contextWindowUsage = usage);
 
     const mockedResponseContent1 = "Hello! This is ";
     const mockedResponseContent2 = "mocked content.";
@@ -194,6 +198,7 @@ describe("anthropic", () => {
           messages: [],
           addMessage,
           setCurrentlyStreamedMessage,
+          setContextWindowUsage,
           setIsLoading,
         });
 
@@ -208,6 +213,7 @@ describe("anthropic", () => {
         );
 
         expect(isLoading).toBeFalsy();
+        expect(contextWindowUsage).toBe(0);
       } finally {
         // clear the partial mock so we can mock again
         getStreamedEventsPartial.restore();
@@ -219,7 +225,15 @@ describe("anthropic", () => {
       const getStreamedEventsFull = stub(agent, "getStreamedEvents", () => {
         return Promise.resolve([
           ...mockedContentBlockDeltas,
-          { type: "message_delta" },
+          {
+            type: "message_delta",
+            usage: {
+              input_tokens: 10000,
+              output_tokens: 20000,
+              cache_read_input_tokens: 0,
+              cache_creation_input_tokens: 0,
+            },
+          },
         ]) as ANY_TODO;
       });
 
@@ -229,6 +243,7 @@ describe("anthropic", () => {
           messages: [],
           addMessage,
           setCurrentlyStreamedMessage,
+          setContextWindowUsage,
           setIsLoading,
         });
 
@@ -238,6 +253,10 @@ describe("anthropic", () => {
         // should be empty since we clear the streaming message
         // after its fully streamed
         expect(currentlyStreamedMessage).toEqual("");
+
+        expect(contextWindowUsage).toBe(
+          Math.round((30000 / agent.model.contextWindow) * 100 * 10) / 10,
+        );
 
         expect(isLoading).toBeFalsy();
       } finally {

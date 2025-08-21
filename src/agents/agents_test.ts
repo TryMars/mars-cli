@@ -11,6 +11,7 @@ import {
   defaultAssistantProviderId,
 } from "#services/chat_service/chat_service.ts";
 import { agentsMessages } from "./agents_messages.ts";
+import { Model } from "./agent_types.ts";
 
 describe("agents", () => {
   const availableModels = getAvailableModels();
@@ -33,7 +34,8 @@ describe("agents", () => {
       expect(claudeSonnet4).toEqual({
         id: "claude-sonnet-4-20250514",
         name: "Claude Sonnet 4",
-      });
+        contextWindow: 200000,
+      } as Model);
     });
 
     it("throws error if provider doesnt exist", () => {

@@ -18,6 +18,10 @@ export const InputHandlerProvider = ({ children }: PropsWithChildren) => {
   const handleSubmit = (from: Message["from"]) => {
     // TODO: handle slash commands
 
+    if (!input) {
+      return;
+    }
+
     addMessage({
       content: input,
       from,

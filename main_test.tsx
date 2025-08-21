@@ -121,8 +121,25 @@ describe(
                   text: mockedResponseContent2,
                 },
               },
-              { type: "message_delta" },
+              {
+                type: "message_delta",
+                usage: {
+                  input_tokens: 8,
+                  output_tokens: 15,
+                  cache_read_input_tokens: 0,
+                  cache_creation_input_tokens: 0,
+                },
+              },
             ]) as ANY_TODO;
+          });
+
+          it("handles submitting empty input", () => {
+            // \r is the equivalent of pressing "enter/return"
+            stdin.write("\r");
+            rerender(marsApp);
+
+            // we should not see the loader since nothing was submitted
+            expect(lastFrame()).not.toContain("Thinking...");
           });
 
           it("handles submitting", () => {
@@ -151,6 +168,10 @@ describe(
 
           it("displays current llm", () => {
             expect(lastFrame()).toContain(defaultAssistantModelName);
+          });
+
+          it("displays current usage", () => {
+            expect(lastFrame()).toContain("Context Window Usage: 0%");
           });
 
           it("displays loading indicator", () => {
