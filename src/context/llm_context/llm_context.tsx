@@ -8,9 +8,9 @@ import {
 import { LLMContextState } from "./llm_context_types.ts";
 import { LoadingContext } from "#context/loading_context/loading_context.tsx";
 import { MessageContext } from "#context/message_context/message_context.tsx";
-import { AgentInterface } from "#agents/agent_interface.ts";
 import { ChatContext } from "#context/chat_context/chat_context.tsx";
-import { getAgentInstanceByProviderId } from "#agents/agents.ts";
+import { AgentInterface } from "#llm/agents/agent_interface.ts";
+import { getAgentInstanceByProviderId } from "#llm/llm.ts";
 
 export const LLMContext = createContext<LLMContextState>({
   handleUserMessage: (_) => {},

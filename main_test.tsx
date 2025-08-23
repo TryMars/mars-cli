@@ -8,7 +8,7 @@ import {
   defaultAssistantProviderId,
 } from "#services/chat_service/chat_service.ts";
 import { exists } from "@std/fs";
-import { getAgentInstanceByProviderId } from "#agents/agents.ts";
+import { getAgentInstanceByProviderId } from "#llm/llm.ts";
 import { ANY_TODO } from "#shared/types.ts";
 import { stub } from "jsr:@std/testing/mock";
 import { inputBoxMessages } from "#components/input_box/input_box_messages.ts";

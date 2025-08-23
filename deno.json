@@ -13,7 +13,7 @@
     "#components/": "./src/components/",
     "#context/": "./src/context/",
     "#services/": "./src/services/",
-    "#agents/": "./src/agents/",
+    "#llm/": "./src/llm/",
     "#shared/": "./src/shared/",
 
     "@anthropic-ai/sdk": "npm:@anthropic-ai/sdk@^0.60.0",

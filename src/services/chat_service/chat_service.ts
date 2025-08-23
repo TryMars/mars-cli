@@ -2,8 +2,8 @@ import { join } from "@std/path";
 import { exists, ensureDir } from "@std/fs";
 import { envInTestMode, getHomeDir } from "#shared/utils/utils.ts";
 import { Config } from "./chat_service_types.ts";
-import { findModelById } from "#agents/agents.ts";
 import { chatServiceMessages } from "./chat_service_messages.ts";
+import { findModelById } from "#llm/llm.ts";
 
 export const defaultAssistantModelId = "claude-sonnet-4-20250514";
 export const defaultAssistantModelName = "Claude Sonnet 4";

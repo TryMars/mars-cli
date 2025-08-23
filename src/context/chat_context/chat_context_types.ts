@@ -1,4 +1,4 @@
-import { Model } from "#agents/agent_types.ts";
+import { Model } from "#llm/agents/agents_types.ts";
 
 export type ChatContextState = {
   assistantModel: Model | undefined;

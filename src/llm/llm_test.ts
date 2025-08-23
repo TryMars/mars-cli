@@ -4,23 +4,26 @@ import {
   findModelById,
   getAgentInstanceByProviderId,
   getAvailableModels,
-} from "./agents.ts";
-import { Anthropic } from "./providers/anthropic/anthropic.ts";
+} from "./llm.ts";
+import { Anthropic } from "./agents/anthropic/anthropic.ts";
 import {
   defaultAssistantModelId,
   defaultAssistantProviderId,
 } from "#services/chat_service/chat_service.ts";
-import { agentsMessages } from "./agents_messages.ts";
-import { Model } from "./agent_types.ts";
+import { llmMessages } from "./llm_messages.ts";
+import { Model } from "./agents/agents_types.ts";
+import { AnthropicConfig } from "./agents/anthropic/anthropic_config.ts";
 
 describe("agents", () => {
   const availableModels = getAvailableModels();
 
   describe("getAvailableModels", () => {
     it("includes anthropic", () => {
-      const anthropicModels = Anthropic.getProviderWithModels();
-
-      expect(availableModels).toContainEqual(anthropicModels);
+      expect(availableModels).toContainEqual({
+        id: AnthropicConfig.id,
+        name: AnthropicConfig.name,
+        models: AnthropicConfig.models,
+      });
     });
   });
 
@@ -52,7 +55,7 @@ describe("agents", () => {
           providerId: testProvider,
           modelId: "test-model",
         }),
-      ).toThrow(agentsMessages.error.provider_not_found(testProvider));
+      ).toThrow(llmMessages.error.provider_not_found(testProvider));
     });
 
     it("throws error if model doesnt exist", () => {
@@ -63,7 +66,7 @@ describe("agents", () => {
           providerId: "anthropic",
           modelId: testModel,
         }),
-      ).toThrow(agentsMessages.error.model_not_found(testModel));
+      ).toThrow(llmMessages.error.model_not_found(testModel));
     });
   });
 
@@ -85,7 +88,7 @@ describe("agents", () => {
           providerId: testProvider,
           modelId: defaultAssistantModelId,
         }),
-      ).toThrow(agentsMessages.error.provider_not_found(testProvider));
+      ).toThrow(llmMessages.error.provider_not_found(testProvider));
     });
   });
 });
