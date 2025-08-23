@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { envInTestMode, getHomeDir } from "./utils.ts";
+import { envInTestMode, formatCentsForDisplay, getHomeDir } from "./utils.ts";
 import { stub } from "@std/testing/mock";
 
 describe("shared utils", () => {
@@ -45,6 +45,22 @@ describe("shared utils", () => {
       } finally {
         envStub.restore();
       }
+    });
+  });
+
+  describe("formatCentsForDisplay", () => {
+    it("returns 0.00 if cents is 0", () => {
+      expect(formatCentsForDisplay(0)).toBe("$0.00");
+    });
+
+    it("returns up to 4 decimals if less than 1 cent but grater than 0", () => {
+      expect(formatCentsForDisplay(0.05)).toBe("$0.0005");
+      expect(formatCentsForDisplay(0.5)).toBe("$0.005");
+    });
+
+    it("returns cents formatted as dollars correctly", () => {
+      expect(formatCentsForDisplay(10)).toBe("$0.10");
+      expect(formatCentsForDisplay(405)).toBe("$4.05");
     });
   });
 });

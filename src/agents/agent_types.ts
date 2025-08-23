@@ -10,6 +10,14 @@ export type Model = {
   id: string;
   name: string;
   contextWindow: number;
+  pricing: ModelPricing;
+};
+
+export type ModelPricing = {
+  input_cost: number;
+  output_cost: number;
+  cache_read_cost: number;
+  cache_write_cost: number;
 };
 
 export type Provider = {
@@ -32,10 +40,23 @@ export type StreamResponseProps = {
   addMessage: MessageContextState["addMessage"];
   setCurrentlyStreamedMessage: MessageContextState["setCurrentlyStreamedMessage"];
   setContextWindowUsage: LLMContextState["setContextWindowUsage"];
+  setUsageCost: LLMContextState["setUsageCost"];
   setIsLoading: LoadingContextState["setIsLoading"];
 };
 
-export type SetContextWindowUsageProps = {
+export type HandleContextWindowUsageProps = {
   setContextWindowUsage: LLMContextState["setContextWindowUsage"];
   tokenUsage: Anthropic.MessageDeltaUsage;
+};
+
+export type HandleCostUsageProps = {
+  setUsageCost: LLMContextState["setUsageCost"];
+  tokenUsage: Anthropic.MessageDeltaUsage;
+};
+
+export type ExtractedTokenUsage = {
+  inputTokens: number;
+  cacheReadInputTokens: number;
+  cacheCreationInputTokens: number;
+  outputTokens: number;
 };

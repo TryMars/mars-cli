@@ -148,10 +148,13 @@ describe("anthropic", () => {
       modelId: defaultAssistantModelId,
     });
 
+    // ------------------------------ begin LLM context setup
+
     let message: string = "";
     let currentlyStreamedMessage: string = "This should be empty at the end";
     let isLoading: boolean = true;
     let contextWindowUsage: number = 0;
+    let usageCost: number = 0;
 
     const addMessage = (createMessage: CreateMessageProps) =>
       (message = createMessage.content);
@@ -159,10 +162,16 @@ describe("anthropic", () => {
     const setCurrentlyStreamedMessage = (content: string) =>
       (currentlyStreamedMessage = content);
 
-    const setIsLoading = (loading: boolean) => (isLoading = loading);
-
     const setContextWindowUsage = (usage: number) =>
       (contextWindowUsage = usage);
+
+    const setUsageCost = (cost: number) => (usageCost = cost);
+
+    const setIsLoading = (loading: boolean) => (isLoading = loading);
+
+    // ------------------------------ end LLM context setup
+
+    // ------------------------------ begin message delta setup
 
     const mockedResponseContent1 = "Hello! This is ";
     const mockedResponseContent2 = "mocked content.";
@@ -184,6 +193,18 @@ describe("anthropic", () => {
       },
     ];
 
+    const mockedMessageDelta = {
+      type: "message_delta",
+      usage: {
+        input_tokens: 10000,
+        output_tokens: 20000,
+        cache_read_input_tokens: 0,
+        cache_creation_input_tokens: 0,
+      },
+    };
+
+    // ------------------------------ end message delta setup
+
     it("can stream a partial response", async () => {
       // we're not returning the message_delta event to simulate
       // a partial response, as the message_delta event is sent when
@@ -199,6 +220,7 @@ describe("anthropic", () => {
           addMessage,
           setCurrentlyStreamedMessage,
           setContextWindowUsage,
+          setUsageCost,
           setIsLoading,
         });
 
@@ -214,6 +236,7 @@ describe("anthropic", () => {
 
         expect(isLoading).toBeFalsy();
         expect(contextWindowUsage).toBe(0);
+        expect(usageCost).toBe(0);
       } finally {
         // clear the partial mock so we can mock again
         getStreamedEventsPartial.restore();
@@ -225,15 +248,7 @@ describe("anthropic", () => {
       const getStreamedEventsFull = stub(agent, "getStreamedEvents", () => {
         return Promise.resolve([
           ...mockedContentBlockDeltas,
-          {
-            type: "message_delta",
-            usage: {
-              input_tokens: 10000,
-              output_tokens: 20000,
-              cache_read_input_tokens: 0,
-              cache_creation_input_tokens: 0,
-            },
-          },
+          mockedMessageDelta,
         ]) as ANY_TODO;
       });
 
@@ -244,6 +259,7 @@ describe("anthropic", () => {
           addMessage,
           setCurrentlyStreamedMessage,
           setContextWindowUsage,
+          setUsageCost,
           setIsLoading,
         });
 
@@ -254,10 +270,8 @@ describe("anthropic", () => {
         // after its fully streamed
         expect(currentlyStreamedMessage).toEqual("");
 
-        expect(contextWindowUsage).toBe(
-          Math.round((30000 / agent.model.contextWindow) * 100 * 10) / 10,
-        );
-
+        expect(contextWindowUsage).toBe(15);
+        expect(usageCost).toBe(33);
         expect(isLoading).toBeFalsy();
       } finally {
         getStreamedEventsFull.restore();

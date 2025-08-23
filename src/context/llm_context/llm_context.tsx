@@ -16,6 +16,8 @@ export const LLMContext = createContext<LLMContextState>({
   handleUserMessage: (_) => {},
   setContextWindowUsage: (_) => {},
   contextWindowUsage: 0,
+  setUsageCost: (_) => {},
+  usageCost: 0,
 });
 
 export const LLMProvider = ({ children }: PropsWithChildren) => {
@@ -25,6 +27,7 @@ export const LLMProvider = ({ children }: PropsWithChildren) => {
   const { assistantModel, assistantProviderId } = useContext(ChatContext);
   const [agent, setAgent] = useState<AgentInterface>();
   const [contextWindowUsage, setContextWindowUsage] = useState<number>(0);
+  const [usageCost, setUsageCost] = useState<number>(0);
 
   useEffect(() => {
     if (assistantProviderId && assistantModel) {
@@ -46,13 +49,20 @@ export const LLMProvider = ({ children }: PropsWithChildren) => {
       addMessage,
       setCurrentlyStreamedMessage,
       setContextWindowUsage,
+      setUsageCost,
       setIsLoading,
     });
   };
 
   return (
     <LLMContext.Provider
-      value={{ handleUserMessage, contextWindowUsage, setContextWindowUsage }}
+      value={{
+        handleUserMessage,
+        contextWindowUsage,
+        setContextWindowUsage,
+        usageCost,
+        setUsageCost,
+      }}
     >
       {children}
     </LLMContext.Provider>

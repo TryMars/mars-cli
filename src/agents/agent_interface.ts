@@ -8,6 +8,7 @@ export interface AgentInterface {
     addMessage,
     setCurrentlyStreamedMessage,
     setContextWindowUsage,
+    setUsageCost,
     setIsLoading,
   }: StreamResponseProps): Promise<void>;
 

@@ -170,8 +170,12 @@ describe(
             expect(lastFrame()).toContain(defaultAssistantModelName);
           });
 
-          it("displays current usage", () => {
-            expect(lastFrame()).toContain("Context Window Usage: 0%");
+          it("displays current context window usage", () => {
+            expect(lastFrame()).toContain("Context Window: 0%");
+          });
+
+          it("displays current cost usage", () => {
+            expect(lastFrame()).toContain("Spent: $0.00");
           });
 
           it("displays loading indicator", () => {

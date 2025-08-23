@@ -35,6 +35,12 @@ describe("agents", () => {
         id: "claude-sonnet-4-20250514",
         name: "Claude Sonnet 4",
         contextWindow: 200000,
+        pricing: {
+          input_cost: 300,
+          output_cost: 1500,
+          cache_read_cost: 30,
+          cache_write_cost: 375,
+        },
       } as Model);
     });
 
