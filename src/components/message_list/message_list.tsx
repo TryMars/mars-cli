@@ -8,7 +8,7 @@ import {
 import { Message } from "#context/message_context/message_context_types.ts";
 
 export const MessageList = () => {
-  const { messages, currentlyStreamedMessage } = useContext(MessageContext);
+  const { messages } = useContext(MessageContext);
 
   return (
     <Box marginTop={messages.length > 0 ? 1 : 0} flexDirection="column" gap={1}>
@@ -27,15 +27,6 @@ export const MessageList = () => {
           </Box>
         </Box>
       ))}
-
-      {currentlyStreamedMessage && (
-        <Box flexDirection="row" key="temp-streamed-message">
-          <Box flexShrink={1}>{getMessagePrefix("assistant")}</Box>
-          <Box>
-            <Text>{currentlyStreamedMessage}</Text>
-          </Box>
-        </Box>
-      )}
     </Box>
   );
 };

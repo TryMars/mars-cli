@@ -142,7 +142,7 @@ describe("anthropic", () => {
     });
   });
 
-  describe("streamResponse", () => {
+  describe("createResponse", () => {
     const agent = getAgentInstanceByProviderId({
       providerId: defaultAssistantProviderId,
       modelId: defaultAssistantModelId,
@@ -151,16 +151,12 @@ describe("anthropic", () => {
     // ------------------------------ begin LLM context setup
 
     let message: string = "";
-    let currentlyStreamedMessage: string = "This should be empty at the end";
     let isLoading: boolean = true;
     let contextWindowUsage: number = 0;
     let usageCost: number = 0;
 
     const addMessage = (createMessage: CreateMessageProps) =>
       (message = createMessage.content);
-
-    const setCurrentlyStreamedMessage = (content: string) =>
-      (currentlyStreamedMessage = content);
 
     const setContextWindowUsage = (usage: number) =>
       (contextWindowUsage = usage);
@@ -171,107 +167,56 @@ describe("anthropic", () => {
 
     // ------------------------------ end LLM context setup
 
-    // ------------------------------ begin message delta setup
+    // ------------------------------ begin mock response setup
 
-    const mockedResponseContent1 = "Hello! This is ";
-    const mockedResponseContent2 = "mocked content.";
+    const mockedResponseContent = "Hello! This is mocked content.";
 
-    const mockedContentBlockDeltas = [
-      {
-        type: "content_block_delta",
-        delta: {
-          type: "text_delta",
-          text: mockedResponseContent1,
+    const mockedResponse = {
+      id: "msg_01LF55udgebPY2ht18PWYFEQ",
+      type: "message",
+      role: "assistant",
+      model: "claude-sonnet-4-20250514",
+      content: [
+        {
+          type: "text",
+          text: mockedResponseContent,
         },
-      },
-      {
-        type: "content_block_delta",
-        delta: {
-          type: "text_delta",
-          text: mockedResponseContent2,
-        },
-      },
-    ];
-
-    const mockedMessageDelta = {
-      type: "message_delta",
+      ],
+      stop_reason: "end_turn",
+      stop_sequence: null,
       usage: {
-        input_tokens: 10000,
-        output_tokens: 20000,
-        cache_read_input_tokens: 0,
+        input_tokens: 30000,
         cache_creation_input_tokens: 0,
+        cache_read_input_tokens: 0,
+        cache_creation: {
+          ephemeral_5m_input_tokens: 0,
+          ephemeral_1h_input_tokens: 0,
+        },
+        output_tokens: 20000,
+        service_tier: "standard",
       },
     };
 
-    // ------------------------------ end message delta setup
+    // ------------------------------ end mocked response setup
 
-    it("can stream a partial response", async () => {
-      // we're not returning the message_delta event to simulate
-      // a partial response, as the message_delta event is sent when
-      // the message has finished streaming
-      const getStreamedEventsPartial = stub(agent, "getStreamedEvents", () => {
-        return Promise.resolve(mockedContentBlockDeltas) as ANY_TODO;
+    it("can get a response", async () => {
+      const getStreamedEventsFull = stub(agent, "createLLMMessage", () => {
+        return Promise.resolve(mockedResponse) as ANY_TODO;
       });
 
       try {
-        await agent.streamResponse({
+        await agent.createResponse({
           content: "hello there",
           messages: [],
           addMessage,
-          setCurrentlyStreamedMessage,
           setContextWindowUsage,
           setUsageCost,
           setIsLoading,
         });
 
-        // should still be blank as it only gets set
-        // when streaming is complete for it.
-        expect(message).toEqual("");
-
-        // should have the message still, since it gets
-        // cleared after streaming is complete for this message
-        expect(currentlyStreamedMessage).toBe(
-          mockedResponseContent1 + mockedResponseContent2,
-        );
-
-        expect(isLoading).toBeFalsy();
-        expect(contextWindowUsage).toBe(0);
-        expect(usageCost).toBe(0);
-      } finally {
-        // clear the partial mock so we can mock again
-        getStreamedEventsPartial.restore();
-      }
-    });
-
-    it("can get a final response", async () => {
-      // add message_delta as well to simulate a finished message
-      const getStreamedEventsFull = stub(agent, "getStreamedEvents", () => {
-        return Promise.resolve([
-          ...mockedContentBlockDeltas,
-          mockedMessageDelta,
-        ]) as ANY_TODO;
-      });
-
-      try {
-        await agent.streamResponse({
-          content: "hello there",
-          messages: [],
-          addMessage,
-          setCurrentlyStreamedMessage,
-          setContextWindowUsage,
-          setUsageCost,
-          setIsLoading,
-        });
-
-        // should have the full message since the message finished streaming
-        expect(message).toBe(mockedResponseContent1 + mockedResponseContent2);
-
-        // should be empty since we clear the streaming message
-        // after its fully streamed
-        expect(currentlyStreamedMessage).toEqual("");
-
-        expect(contextWindowUsage).toBe(15);
-        expect(usageCost).toBe(33);
+        expect(message).toBe(mockedResponseContent);
+        expect(contextWindowUsage).toBe(25);
+        expect(usageCost).toBe(39);
         expect(isLoading).toBeFalsy();
       } finally {
         getStreamedEventsFull.restore();

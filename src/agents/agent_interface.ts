@@ -1,17 +1,17 @@
-import { Model, StreamResponseProps } from "./agent_types.ts";
+import { Model } from "./agent_types.ts";
+import { CreateResponseProps } from "./providers/anthropic/anthropic_types.ts";
 
 export interface AgentInterface {
   model: Model;
 
-  streamResponse({
+  createResponse({
     content,
     addMessage,
-    setCurrentlyStreamedMessage,
     setContextWindowUsage,
     setUsageCost,
     setIsLoading,
-  }: StreamResponseProps): Promise<void>;
+  }: CreateResponseProps): Promise<void>;
 
   // @ts-ignore: idk what return type to use here. maybe im dumb.
-  getStreamedEvents(content: string);
+  createLLMMessage(content: string, messages: Message[]);
 }

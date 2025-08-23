@@ -102,35 +102,34 @@ describe(
             modelId: defaultAssistantModelId,
           });
 
-          const mockedResponseContent1 = "Hello! This is ";
-          const mockedResponseContent2 = "mocked content.";
+          const mockedResponseContent = "Hello! This is mocked content.";
 
-          stub(agent, "getStreamedEvents", () => {
-            return Promise.resolve([
-              {
-                type: "content_block_delta",
-                delta: {
-                  type: "text_delta",
-                  text: mockedResponseContent1,
+          stub(agent, "createLLMMessage", () => {
+            return Promise.resolve({
+              id: "msg_01LF55udgebPY2ht18PWYFEQ",
+              type: "message",
+              role: "assistant",
+              model: "claude-sonnet-4-20250514",
+              content: [
+                {
+                  type: "text",
+                  text: mockedResponseContent,
                 },
-              },
-              {
-                type: "content_block_delta",
-                delta: {
-                  type: "text_delta",
-                  text: mockedResponseContent2,
+              ],
+              stop_reason: "end_turn",
+              stop_sequence: null,
+              usage: {
+                input_tokens: 8,
+                cache_creation_input_tokens: 0,
+                cache_read_input_tokens: 0,
+                cache_creation: {
+                  ephemeral_5m_input_tokens: 0,
+                  ephemeral_1h_input_tokens: 0,
                 },
+                output_tokens: 20,
+                service_tier: "standard",
               },
-              {
-                type: "message_delta",
-                usage: {
-                  input_tokens: 8,
-                  output_tokens: 15,
-                  cache_read_input_tokens: 0,
-                  cache_creation_input_tokens: 0,
-                },
-              },
-            ]) as ANY_TODO;
+            }) as ANY_TODO;
           });
 
           it("handles submitting empty input", () => {
@@ -185,9 +184,7 @@ describe(
           it("receives response from llm", () => {
             rerender(marsApp);
 
-            expect(lastFrame()).toContain(
-              "⏺ " + mockedResponseContent1 + mockedResponseContent2,
-            );
+            expect(lastFrame()).toContain("⏺ " + mockedResponseContent);
           });
         });
 

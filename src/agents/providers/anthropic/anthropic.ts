@@ -2,10 +2,9 @@ import {
   ExtractedTokenUsage,
   HandleContextWindowUsageProps,
   HandleCostUsageProps,
-  Model,
-  ProviderWithModels,
-  StreamResponseProps,
-} from "#agents/agent_types.ts";
+  CreateResponseProps,
+} from "#agents/providers/anthropic/anthropic_types.ts";
+import { Model, ProviderWithModels } from "#agents/agent_types.ts";
 import { AgentInterface } from "#agents/agent_interface.ts";
 import { Anthropic as AnthropicClient } from "@anthropic-ai/sdk";
 import { agentsMessages } from "#agents/agents_messages.ts";
@@ -156,64 +155,59 @@ export class Anthropic implements AgentInterface {
     }));
   }
 
-  async getStreamedEvents(content: string, messages: Message[] = []) {
+  async createResponse({
+    content,
+    messages,
+    addMessage,
+    setContextWindowUsage,
+    setUsageCost,
+    setIsLoading,
+  }: CreateResponseProps) {
+    let message: string = "";
+
+    // TODO: api check to see amount of tokens. calculate if that goes over the
+    // the context window limit we set, if so, then auto compact and rerun this
+    // again? maybe no need to rerun the api call
+
+    const response = await this.createLLMMessage(content, messages);
+
+    for (const content of response.content) {
+      if (content.type === "text") {
+        message += content.text;
+      } else {
+        // gonna console log cuz idk how else this is structured
+        console.log(response);
+      }
+    }
+
+    addMessage({
+      content: message,
+      from: "assistant",
+    });
+
+    this.handleContextWindowUsage({
+      setContextWindowUsage,
+      tokenUsage: response.usage,
+    });
+
+    this.handleCostUsage({
+      setUsageCost,
+      tokenUsage: response.usage,
+    });
+
+    setIsLoading(false);
+  }
+
+  // TODO: use an object for the params
+  async createLLMMessage(content: string, messages: Message[] = []) {
     return await this.client.messages.create({
-      max_tokens: 1024,
+      max_tokens: 1024, // TODO: look into this...
       messages: [
         ...this.convertToLLMMessages(messages),
         { role: "user", content },
       ],
       model: this.model.id,
-      stream: true,
     });
-  }
-
-  async streamResponse({
-    content,
-    messages,
-    addMessage,
-    setCurrentlyStreamedMessage,
-    setContextWindowUsage,
-    setUsageCost,
-    setIsLoading,
-  }: StreamResponseProps) {
-    let message: string = "";
-
-    const stream = await this.getStreamedEvents(content, messages);
-
-    for await (const messageStreamEvent of stream) {
-      if (
-        messageStreamEvent.type === "content_block_delta" &&
-        messageStreamEvent.delta.type === "text_delta"
-      ) {
-        message += messageStreamEvent.delta.text;
-
-        setCurrentlyStreamedMessage(message);
-      }
-
-      if (messageStreamEvent.type === "message_delta" && message) {
-        setCurrentlyStreamedMessage("");
-
-        addMessage({
-          content: message,
-          from: "assistant",
-        });
-
-        message = "";
-
-        this.handleContextWindowUsage({
-          setContextWindowUsage,
-          tokenUsage: messageStreamEvent.usage,
-        });
-
-        this.handleCostUsage({
-          setUsageCost,
-          tokenUsage: messageStreamEvent.usage,
-        });
-      }
-    }
-
-    setIsLoading(false);
   }
 
   private handleContextWindowUsage({
@@ -237,8 +231,6 @@ export class Anthropic implements AgentInterface {
       this.calculateContextWindowFromUsage(contextWindowUsage);
 
     setContextWindowUsage(contextWindowUsagePercentage);
-
-    // TODO: check a threshhold, and if we are approaching that threshold, auto compact the context.
   }
 
   private calculateContextWindowFromUsage(contextWindowUsage: number): number {
@@ -285,9 +277,7 @@ export class Anthropic implements AgentInterface {
     );
   }
 
-  private extractTokenUsage(
-    usage: AnthropicClient.MessageDeltaUsage,
-  ): ExtractedTokenUsage {
+  private extractTokenUsage(usage: AnthropicClient.Usage): ExtractedTokenUsage {
     return {
       inputTokens: Number(usage.input_tokens),
       cacheReadInputTokens: Number(usage.cache_read_input_tokens),
