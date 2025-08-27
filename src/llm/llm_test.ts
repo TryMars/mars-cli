@@ -4,6 +4,7 @@ import {
   findModelById,
   getAgentInstanceByProviderId,
   getAvailableModels,
+  getAvailableTools,
 } from "./llm.ts";
 import { Anthropic } from "./agents/anthropic/anthropic.ts";
 import {
@@ -13,13 +14,12 @@ import {
 import { llmMessages } from "./llm_messages.ts";
 import { Model } from "./agents/agents_types.ts";
 import { AnthropicConfig } from "./agents/anthropic/anthropic_config.ts";
+import { FindFileConfig } from "./tools/find_file/find_file_config.ts";
 
 describe("agents", () => {
-  const availableModels = getAvailableModels();
-
   describe("getAvailableModels", () => {
     it("includes anthropic", () => {
-      expect(availableModels).toContainEqual({
+      expect(getAvailableModels()).toContainEqual({
         id: AnthropicConfig.id,
         name: AnthropicConfig.name,
         models: AnthropicConfig.models,
@@ -89,6 +89,12 @@ describe("agents", () => {
           modelId: defaultAssistantModelId,
         }),
       ).toThrow(llmMessages.error.provider_not_found(testProvider));
+    });
+  });
+
+  describe("getAvailableTools", () => {
+    it("includes find_file", () => {
+      expect(getAvailableTools()).toContainEqual(FindFileConfig.schema);
     });
   });
 });

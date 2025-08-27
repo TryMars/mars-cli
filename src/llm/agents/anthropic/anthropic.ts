@@ -5,10 +5,13 @@ import { AnthropicConfig } from "./anthropic_config.ts";
 import { BaseAgent } from "#llm/agents/base_agent/base_agent.ts";
 import { Model, TokenUsage } from "#llm/agents/agents_types.ts";
 import { llmMessages } from "#llm/llm_messages.ts";
+import { getAvailableTools } from "#llm/llm.ts";
+import { ToolConfigSchema } from "#llm/tools/tools_types.ts";
 
 export class Anthropic extends BaseAgent<
   AnthropicClient.Message,
-  AnthropicClient.MessageParam
+  AnthropicClient.MessageParam,
+  AnthropicClient.Tool
 > {
   private static instance: Anthropic | null;
   private client: AnthropicClient;
@@ -39,9 +42,10 @@ export class Anthropic extends BaseAgent<
     messages: Message[] = [],
   ): Promise<AnthropicClient.Message> {
     return await this.client.messages.create({
-      max_tokens: 1024,
-      messages: [...this.convertMessages(messages), { role: "user", content }],
       model: this.model.id,
+      max_tokens: 1024,
+      tools: this.getTools(),
+      messages: [...this.convertMessages(messages), { role: "user", content }],
     });
   }
 
@@ -76,6 +80,15 @@ export class Anthropic extends BaseAgent<
       cacheReadTokens: Number(message.usage.cache_read_input_tokens),
       cacheWriteTokens: Number(message.usage.cache_creation_input_tokens),
     };
+  }
+
+  // TODO: need to test this
+  protected getTools(): AnthropicClient.Tool[] {
+    return getAvailableTools().map((toolSchema: ToolConfigSchema) => ({
+      name: toolSchema.name,
+      description: toolSchema.description,
+      input_schema: toolSchema.input_schema,
+    }));
   }
 
   static cleanup(): void {

@@ -40,12 +40,17 @@ export class AgentRegistry {
     );
   }
 
-  static getAgent(providerId: string): AgentConfig | undefined {
-    return this.agents.get(providerId);
+  static getAgent(providerId: string): AgentConfig {
+    const agent = this.agents.get(providerId);
+
+    if (agent === undefined) {
+      throw new TypeError(llmMessages.error.provider_not_found(providerId));
+    }
+
+    return agent;
   }
 
   static getAllProviderIds(): string[] {
     return Array.from(this.agents.keys());
   }
 }
-

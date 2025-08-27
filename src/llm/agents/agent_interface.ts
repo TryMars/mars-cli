@@ -5,5 +5,6 @@ export interface AgentInterface {
   model: Model;
 
   createResponse(props: CreateResponseProps): Promise<void>;
+
   createLLMMessage(content: string, messages: Message[]): Promise<unknown>;
 }

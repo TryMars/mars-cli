@@ -5,12 +5,11 @@ import { AgentConfig, Model } from "#llm/agents/agents_types.ts";
 import { AgentInterface } from "#llm/agents/agent_interface.ts";
 import { llmMessages } from "#llm/llm_messages.ts";
 
-// Mock agent implementation for testing
 class MockAgent implements AgentInterface {
   constructor(public model: Model) {}
 
   async createResponse(): Promise<void> {
-    // Mock implementation
+    // ...
   }
 
   async createLLMMessage(): Promise<unknown> {
@@ -187,9 +186,12 @@ describe("AgentRegistry", () => {
       expect(agent).toEqual(mockAgentConfig);
     });
 
-    it("returns undefined for non-existent provider", () => {
-      const agent = AgentRegistry.getAgent("non-existent-provider");
-      expect(agent).toBeUndefined();
+    it("throws error for non-existent provider", () => {
+      const fakeProvider = "non-existent-provider";
+
+      expect(() => AgentRegistry.getAgent(fakeProvider)).toThrow(
+        llmMessages.error.provider_not_found(fakeProvider),
+      );
     });
   });
 
@@ -218,4 +220,3 @@ describe("AgentRegistry", () => {
     });
   });
 });
-

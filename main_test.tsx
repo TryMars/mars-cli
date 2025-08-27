@@ -9,7 +9,6 @@ import {
 } from "#services/chat_service/chat_service.ts";
 import { exists } from "@std/fs";
 import { getAgentInstanceByProviderId } from "#llm/llm.ts";
-import { ANY_TODO } from "#shared/types.ts";
 import { stub } from "jsr:@std/testing/mock";
 import { inputBoxMessages } from "#components/input_box/input_box_messages.ts";
 import { marsMessages } from "#components/mars/mars_messages.ts";
@@ -129,7 +128,7 @@ describe(
                 output_tokens: 20,
                 service_tier: "standard",
               },
-            }) as ANY_TODO;
+            });
           });
 
           it("handles submitting empty input", () => {

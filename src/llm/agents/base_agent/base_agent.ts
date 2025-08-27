@@ -7,8 +7,11 @@ import {
 } from "#llm/agents/agents_types.ts";
 import { Message } from "#context/message_context/message_context_types.ts";
 
-export abstract class BaseAgent<TMessage = object, TMessageParam = object>
-  implements AgentInterface
+export abstract class BaseAgent<
+  TMessage = object,
+  TMessageParam = object,
+  TTool = object,
+> implements AgentInterface
 {
   public model: Model;
 
@@ -26,6 +29,9 @@ export abstract class BaseAgent<TMessage = object, TMessageParam = object>
   protected abstract extractTokenUsage(message: TMessage): TokenUsage;
 
   protected abstract convertMessages(messages: Message[]): TMessageParam[];
+
+  // TODO: need to test this
+  protected abstract getTools(): TTool[];
 
   async createResponse({
     content,
