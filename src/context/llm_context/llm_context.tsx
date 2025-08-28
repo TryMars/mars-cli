@@ -22,7 +22,7 @@ export const LLMContext = createContext<LLMContextState>({
 
 export const LLMProvider = ({ children }: PropsWithChildren) => {
   const { setIsLoading } = useContext(LoadingContext);
-  const { messages, addMessage } = useContext(MessageContext);
+  const { addMessage } = useContext(MessageContext);
   const { assistantModel, assistantProviderId } = useContext(ChatContext);
   const [agent, setAgent] = useState<AgentInterface>();
   const [contextWindowUsage, setContextWindowUsage] = useState<number>(0);
@@ -44,7 +44,6 @@ export const LLMProvider = ({ children }: PropsWithChildren) => {
 
     await agent?.createResponse({
       content,
-      messages,
       addMessage,
       setContextWindowUsage,
       setUsageCost,

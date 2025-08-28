@@ -1,20 +1,25 @@
 import { Anthropic as AnthropicClient } from "@anthropic-ai/sdk";
 import { envInTestMode } from "#shared/utils/utils.ts";
-import { Message } from "#context/message_context/message_context_types.ts";
+import {
+  Message,
+  MessageContextState,
+} from "#context/message_context/message_context_types.ts";
 import { AnthropicConfig } from "./anthropic_config.ts";
 import { BaseAgent } from "#llm/agents/base_agent/base_agent.ts";
 import { Model, TokenUsage } from "#llm/agents/agents_types.ts";
 import { llmMessages } from "#llm/llm_messages.ts";
-import { getAvailableTools } from "#llm/llm.ts";
+import { getAvailableTools, getToolInstanceByToolName } from "#llm/llm.ts";
 import { ToolConfigSchema } from "#llm/tools/tools_types.ts";
 
 export class Anthropic extends BaseAgent<
+  AnthropicClient,
   AnthropicClient.Message,
   AnthropicClient.MessageParam,
   AnthropicClient.Tool
 > {
   private static instance: Anthropic | null;
-  private client: AnthropicClient;
+  protected client: AnthropicClient;
+  protected messages: AnthropicClient.MessageParam[] = [];
 
   private constructor(model: Model) {
     super(model);
@@ -38,15 +43,31 @@ export class Anthropic extends BaseAgent<
   }
 
   async createLLMMessage(
-    content: string,
-    messages: Message[] = [],
+    content: string | AnthropicClient.MessageParam["content"],
   ): Promise<AnthropicClient.Message> {
-    return await this.client.messages.create({
+    const userMessage = {
+      role: "user",
+      content,
+    } as AnthropicClient.MessageParam;
+
+    const message = await this.client.messages.create({
       model: this.model.id,
       max_tokens: 1024,
       tools: this.getTools(),
-      messages: [...this.convertMessages(messages), { role: "user", content }],
+      messages: [...this.messages, userMessage],
     });
+
+    this.messages.push({
+      role: "user",
+      content,
+    });
+
+    this.messages.push({
+      role: message.role,
+      content: message.content,
+    });
+
+    return message;
   }
 
   protected convertMessages(
@@ -58,19 +79,35 @@ export class Anthropic extends BaseAgent<
     }));
   }
 
-  protected extractLLMMessageContent(message: AnthropicClient.Message): string {
-    let messageContent: string = "";
+  protected async handleMessageBlocks(
+    addMessage: MessageContextState["addMessage"],
+    message: AnthropicClient.Messages.Message,
+  ): Promise<void> {
+    return await Promise.resolve().then(async () => {
+      for (const content of message.content) {
+        if (content.type === "text") {
+          addMessage({
+            content: content.text,
+            from: "assistant",
+          });
+        } else if (content.type === "tool_use") {
+          const tool = getToolInstanceByToolName(content.name);
 
-    for (const content of message.content) {
-      if (content.type === "text") {
-        messageContent += content.text;
-      } else {
-        // TODO: handle tool calls? idk yet
-        console.log(message);
+          const toolResults = await tool.run(addMessage, content.input);
+
+          const toolResultMessage = await this.createLLMMessage([
+            {
+              type: "tool_result",
+              tool_use_id: content.id,
+              content: toolResults,
+            },
+          ]);
+
+          // recursively call itself until its finished
+          this.handleMessageBlocks(addMessage, toolResultMessage);
+        }
       }
-    }
-
-    return messageContent;
+    });
   }
 
   protected extractTokenUsage(message: AnthropicClient.Message): TokenUsage {

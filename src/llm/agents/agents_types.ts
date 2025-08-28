@@ -1,4 +1,3 @@
-import { Message } from "#context/message_context/message_context_types.ts";
 import { MessageContextState } from "#context/message_context/message_context_types.ts";
 import { LoadingContextState } from "#context/loading_context/loading_context_types.ts";
 import { LLMContextState } from "#context/llm_context/llm_context_types.ts";
@@ -41,7 +40,6 @@ export type TokenUsage = {
 
 export type CreateResponseProps = {
   content: string;
-  messages: Message[];
   addMessage: MessageContextState["addMessage"];
   setContextWindowUsage: LLMContextState["setContextWindowUsage"];
   setUsageCost: LLMContextState["setUsageCost"];

@@ -10,6 +10,7 @@ import { AgentInterface } from "./agents/agent_interface.ts";
 import { tools } from "./tools/tools.ts";
 import { ToolRegistry } from "./registries/tool_registry/tool_registry.ts";
 import { ToolConfigSchema } from "./tools/tools_types.ts";
+import { ToolInterface } from "./tools/tool_interface.ts";
 
 for (const tool of tools) {
   ToolRegistry.register(tool);
@@ -51,4 +52,8 @@ export const getAgentInstanceByProviderId = ({
 
 export const getAvailableTools = (): ToolConfigSchema[] => {
   return ToolRegistry.getTools();
+};
+
+export const getToolInstanceByToolName = (toolName: string): ToolInterface => {
+  return ToolRegistry.getInstance(toolName);
 };

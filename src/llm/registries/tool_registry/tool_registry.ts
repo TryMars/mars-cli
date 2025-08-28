@@ -19,7 +19,7 @@ export class ToolRegistry {
     return tool;
   }
 
-  static getInstance(toolName: string): ToolInterface | undefined {
+  static getInstance(toolName: string): ToolInterface {
     return this.getTool(toolName).tool;
   }
 

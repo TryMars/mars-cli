@@ -1,5 +1,8 @@
-export interface ToolInterface {
-  displayToolLoadingMessage(params: unknown): Promise<void>;
+import { MessageContextState } from "#context/message_context/message_context_types.ts";
 
-  run(params: unknown): Promise<string>;
+export interface ToolInterface {
+  run(
+    addMessage: MessageContextState["addMessage"],
+    params: unknown,
+  ): Promise<string>;
 }

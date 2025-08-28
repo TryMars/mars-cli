@@ -5,56 +5,57 @@ import {
   TokenUsage,
   HandleUsageProps,
 } from "#llm/agents/agents_types.ts";
-import { Message } from "#context/message_context/message_context_types.ts";
+import {
+  Message,
+  MessageContextState,
+} from "#context/message_context/message_context_types.ts";
 
 export abstract class BaseAgent<
+  TClient = object,
   TMessage = object,
   TMessageParam = object,
   TTool = object,
 > implements AgentInterface
 {
   public model: Model;
+  protected abstract client: TClient;
+  protected abstract messages: TMessageParam[];
 
   constructor(model: Model) {
     this.model = model;
   }
 
-  abstract createLLMMessage(
-    content: string,
-    messages: Message[],
-  ): Promise<TMessage>;
-
-  protected abstract extractLLMMessageContent(message: TMessage): string;
+  abstract createLLMMessage(content: string): Promise<TMessage>;
 
   protected abstract extractTokenUsage(message: TMessage): TokenUsage;
 
   protected abstract convertMessages(messages: Message[]): TMessageParam[];
 
-  // TODO: need to test this
   protected abstract getTools(): TTool[];
+
+  protected abstract handleMessageBlocks(
+    addMessage: MessageContextState["addMessage"],
+    message: TMessage,
+  ): Promise<void>;
 
   async createResponse({
     content,
-    messages,
     addMessage,
     setContextWindowUsage,
     setUsageCost,
     setIsLoading,
   }: CreateResponseProps): Promise<void> {
-    const message = await this.createLLMMessage(content, messages);
-    const messageContent = this.extractLLMMessageContent(message);
-    const tokenUsage = this.extractTokenUsage(message);
+    const message = await this.createLLMMessage(content);
 
-    addMessage({
-      content: messageContent,
-      from: "assistant",
-    });
+    const tokenUsage = this.extractTokenUsage(message);
 
     this.handleUsage({
       setContextWindowUsage,
       setUsageCost,
       tokenUsage,
     });
+
+    await this.handleMessageBlocks(addMessage, message);
 
     setIsLoading(false);
   }
