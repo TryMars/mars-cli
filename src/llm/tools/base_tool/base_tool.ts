@@ -18,7 +18,7 @@ export abstract class BaseTool<TToolParams = object> implements ToolInterface {
     return await Promise.resolve().then(() => {
       addMessage({
         content: this.getToolLoadingMessage(params),
-        from: "assistant",
+        from: "tool_call",
       });
     });
   }

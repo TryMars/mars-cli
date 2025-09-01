@@ -9,11 +9,13 @@ import {
   Message,
   MessageContextState,
 } from "#context/message_context/message_context_types.ts";
+import { LLMContextState } from "#context/llm_context/llm_context_types.ts";
 
 export abstract class BaseAgent<
   TClient = object,
   TMessage = object,
   TMessageParam = object,
+  TMessageParamContent = object[],
   TTool = object,
 > implements AgentInterface
 {
@@ -33,9 +35,11 @@ export abstract class BaseAgent<
 
   protected abstract getTools(): TTool[];
 
-  protected abstract handleMessageBlocks(
+  protected abstract handleMessageContent(
+    content: string | TMessageParamContent,
     addMessage: MessageContextState["addMessage"],
-    message: TMessage,
+    setContextWindowUsage: LLMContextState["setContextWindowUsage"],
+    setUsageCost: LLMContextState["setUsageCost"],
   ): Promise<void>;
 
   async createResponse({
@@ -45,17 +49,12 @@ export abstract class BaseAgent<
     setUsageCost,
     setIsLoading,
   }: CreateResponseProps): Promise<void> {
-    const message = await this.createLLMMessage(content);
-
-    const tokenUsage = this.extractTokenUsage(message);
-
-    this.handleUsage({
+    await this.handleMessageContent(
+      content,
+      addMessage,
       setContextWindowUsage,
       setUsageCost,
-      tokenUsage,
-    });
-
-    await this.handleMessageBlocks(addMessage, message);
+    );
 
     setIsLoading(false);
   }

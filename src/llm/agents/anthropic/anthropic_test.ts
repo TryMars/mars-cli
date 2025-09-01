@@ -124,53 +124,13 @@ describe("anthropic", () => {
       );
 
       try {
-        const response = await anthropicInstance.createLLMMessage(
-          "test message",
-          [],
-        );
+        const response =
+          await anthropicInstance.createLLMMessage("test message");
 
         expect(response).toEqual(mockedAnthropicResponse);
       } finally {
         clientStub.restore();
       }
-    });
-  });
-
-  describe("extractLLMMessageContent", () => {
-    // cast to access protected methods
-    // deno-lint-ignore no-explicit-any
-    const anthropicInstance = agent as any;
-
-    it("extracts text content from single text block", () => {
-      const message = {
-        content: [
-          {
-            type: "text",
-            text: "This is a test response.",
-          },
-        ],
-      } as AnthropicClient.Message;
-
-      const result = anthropicInstance.extractLLMMessageContent(message);
-      expect(result).toBe("This is a test response.");
-    });
-
-    it("concatenates multiple text blocks", () => {
-      const message = {
-        content: [
-          {
-            type: "text",
-            text: "First part. ",
-          },
-          {
-            type: "text",
-            text: "Second part.",
-          },
-        ],
-      } as AnthropicClient.Message;
-
-      const result = anthropicInstance.extractLLMMessageContent(message);
-      expect(result).toBe("First part. Second part.");
     });
   });
 

@@ -10,11 +10,13 @@ import { Model, TokenUsage } from "#llm/agents/agents_types.ts";
 import { llmMessages } from "#llm/llm_messages.ts";
 import { getAvailableTools, getToolInstanceByToolName } from "#llm/llm.ts";
 import { ToolConfigSchema } from "#llm/tools/tools_types.ts";
+import { LLMContextState } from "#context/llm_context/llm_context_types.ts";
 
 export class Anthropic extends BaseAgent<
   AnthropicClient,
   AnthropicClient.Message,
   AnthropicClient.MessageParam,
+  AnthropicClient.MessageParam["content"],
   AnthropicClient.Tool
 > {
   private static instance: Anthropic | null;
@@ -79,11 +81,23 @@ export class Anthropic extends BaseAgent<
     }));
   }
 
-  protected async handleMessageBlocks(
+  protected async handleMessageContent(
+    content: string | AnthropicClient.MessageParam["content"],
     addMessage: MessageContextState["addMessage"],
-    message: AnthropicClient.Messages.Message,
+    setContextWindowUsage: LLMContextState["setContextWindowUsage"],
+    setUsageCost: LLMContextState["setUsageCost"],
   ): Promise<void> {
     return await Promise.resolve().then(async () => {
+      const message = await this.createLLMMessage(content);
+
+      const tokenUsage = this.extractTokenUsage(message);
+
+      this.handleUsage({
+        setContextWindowUsage,
+        setUsageCost,
+        tokenUsage,
+      });
+
       for (const content of message.content) {
         if (content.type === "text") {
           addMessage({
@@ -95,16 +109,21 @@ export class Anthropic extends BaseAgent<
 
           const toolResults = await tool.run(addMessage, content.input);
 
-          const toolResultMessage = await this.createLLMMessage([
+          const toolResponseContent = [
             {
               type: "tool_result",
               tool_use_id: content.id,
               content: toolResults,
             },
-          ]);
+          ] as AnthropicClient.MessageParam["content"];
 
           // recursively call itself until its finished
-          this.handleMessageBlocks(addMessage, toolResultMessage);
+          await this.handleMessageContent(
+            toolResponseContent,
+            addMessage,
+            setContextWindowUsage,
+            setUsageCost,
+          );
         }
       }
     });
@@ -119,7 +138,6 @@ export class Anthropic extends BaseAgent<
     };
   }
 
-  // TODO: need to test this
   protected getTools(): AnthropicClient.Tool[] {
     return getAvailableTools().map((toolSchema: ToolConfigSchema) => ({
       name: toolSchema.name,

@@ -17,8 +17,16 @@ export const getMessagePrefix = (
     return <Text dimColor>{">"}</Text>;
   }
 
-  if (from === "assistant") {
+  if (from === "tool_call") {
+    return <Text color="green">⏺</Text>;
+  }
+
+  if (from === "tool_call_error") {
     return <Text color="red">⏺</Text>;
+  }
+
+  if (from === "assistant") {
+    return <Text color="white">⏺</Text>;
   }
 
   return "";

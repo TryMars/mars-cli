@@ -45,8 +45,32 @@ describe("message list utils", () => {
       expect(prefixProps.dimColor).toBe(true);
     });
 
-    it("returns ⏺ for assistant messages", () => {
+    it("returns white ⏺  for assistant messages", () => {
       const prefix = getMessagePrefix("assistant") as ReactElement<Text>;
+
+      const prefixProps = prefix.props as PropsWithChildren & {
+        color: TextProps["color"];
+      };
+
+      expect(prefix.type).toBe(Text);
+      expect(prefixProps.children).toBe("⏺");
+      expect(prefixProps.color).toBe("white");
+    });
+
+    it("returns green ⏺  for tool_call messages", () => {
+      const prefix = getMessagePrefix("tool_call") as ReactElement<Text>;
+
+      const prefixProps = prefix.props as PropsWithChildren & {
+        color: TextProps["color"];
+      };
+
+      expect(prefix.type).toBe(Text);
+      expect(prefixProps.children).toBe("⏺");
+      expect(prefixProps.color).toBe("green");
+    });
+
+    it("returns red ⏺  for tool_call_error messages", () => {
+      const prefix = getMessagePrefix("tool_call_error") as ReactElement<Text>;
 
       const prefixProps = prefix.props as PropsWithChildren & {
         color: TextProps["color"];

@@ -4,11 +4,12 @@ import { SearchCWDToolParams } from "./search_cwd_types.ts";
 
 export class SearchCWD extends BaseTool<SearchCWDToolParams> {
   private static instance: SearchCWD | null;
+  private gitignorePatterns: string[] = [];
 
   public name: string = "search_cwd";
 
   public description: string =
-    "Search for files or content(s) within file(s) inside your current working directory.";
+    "Multi-purpose tool for searching and analyzing your current working directory. Supports targeted search, content search, project overview, file tree generation, and reading multiple files with smart sampling.";
 
   public input_schema: ToolConfigInputSchema = {
     type: "object",
@@ -20,9 +21,15 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
       },
       type: {
         type: "string",
-        enum: ["filename", "content"],
+        enum: [
+          "filename",
+          "content",
+          "project_overview",
+          "read_files",
+          "file_tree",
+        ],
         description:
-          "Whether to search for files by name (filename) or search within files (content).",
+          "Operation mode: 'filename' (search by filename), 'content' (search within files), 'project_overview' (get project structure + stats), 'read_files' (read specified files with smart sampling), 'file_tree' (just directory structure).",
       },
       fileTypes: {
         type: "array",
@@ -30,8 +37,14 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
         description:
           "Optional list of file extensions (e.g., ['ts','tsx','js']) to restrict results.",
       },
+      files: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "List of specific files to read (required for 'read_files' mode).",
+      },
     },
-    required: ["query", "type"],
+    required: ["type"],
   };
 
   private constructor() {
@@ -47,23 +60,51 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
   }
 
   protected getToolLoadingMessage(params: SearchCWDToolParams): string {
-    const scope = params.type === "content" ? "content" : "files";
-
-    return `Searching ${scope} in CWD for (“${params.query}”)`;
+    switch (params.type) {
+      case "content":
+        return `Searching file contents for ("${params.query}")...`;
+      case "filename":
+        return `Searching files for ("${params.query}")...`;
+      case "project_overview":
+        return "Analyzing project structure and generating overview...";
+      case "read_files":
+        return `Reading ${params.files?.length || 0} selected files for clearer understanding...`;
+      case "file_tree":
+        return "Generating project file tree...";
+      default:
+        return `Searching for ("${params.query}")`;
+    }
   }
 
   protected async getToolResponse(
     params: SearchCWDToolParams,
   ): Promise<string> {
-    const { query, type, fileTypes = [] } = params;
+    const { query, type, fileTypes = [], files = [] } = params;
 
+    // Handle new project analysis modes
+    switch (type) {
+      case "project_overview":
+        return await this.getProjectOverview();
+      case "read_files":
+        return await this.readSelectedFiles(files);
+      case "file_tree":
+        return await this.getFileTree();
+      case "filename":
+      case "content":
+        // Continue with existing search logic below
+        break;
+      default:
+        return "Invalid operation type";
+    }
+
+    // Existing search logic for filename/content
     // 1) Try ripgrep
     if (await this._hasCmd("rg")) {
       try {
         const out = await this._runWithRipgrep(type, query, fileTypes);
         if (out.trim().length) return out;
         return "No results.";
-      } catch (e) {
+      } catch (_e) {
         // Fall through to next strategy
       }
     }
@@ -74,7 +115,7 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
         const out = await this._runWithFind(type, query, fileTypes);
         if (out.trim().length) return out;
         return "No results.";
-      } catch (e) {
+      } catch (_e) {
         // Fall through to next strategy
       }
     }
@@ -347,5 +388,404 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
         await this._walk(full, child, cb, full);
       }
     }
+  }
+
+  // -----------------------------
+  // New Project Analysis Methods
+  // -----------------------------
+
+  private async loadGitignore(): Promise<void> {
+    this.gitignorePatterns = [];
+
+    try {
+      const gitignoreContent = await Deno.readTextFile(".gitignore");
+      this.gitignorePatterns = gitignoreContent
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith("#"))
+        .map((pattern) => this.globToRegex(pattern));
+    } catch {
+      // No .gitignore file, use minimal defaults
+      this.gitignorePatterns = [
+        this.globToRegex(".git/"),
+        this.globToRegex("node_modules/"),
+      ];
+    }
+  }
+
+  private globToRegex(pattern: string): string {
+    // Simple glob to regex conversion
+    let regex = pattern
+      .replace(/[.+^${}()|[\]\\]/g, "\\$&") // escape regex specials
+      .replace(/\*/g, "[^/]*") // * matches anything except /
+      .replace(/\?/g, "[^/]") // ? matches single char except /
+      .replace(/\\\*\\\*/g, ".*"); // ** matches anything including /
+
+    // Handle directory patterns
+    if (pattern.endsWith("/")) {
+      regex = regex.slice(0, -1) + "(/.*)?$";
+    } else {
+      regex = "^" + regex + "$";
+    }
+
+    return regex;
+  }
+
+  private isIgnored(path: string): boolean {
+    return this.gitignorePatterns.some((pattern) => {
+      const regex = new RegExp(pattern);
+      return regex.test(path) || regex.test(path + "/");
+    });
+  }
+
+  private async getProjectOverview(): Promise<string> {
+    await this.loadGitignore();
+
+    const fileTree: string[] = [];
+    const textFiles: Array<{ path: string; size: number; ext: string }> = [];
+    const languages: { [ext: string]: number } = {};
+    let totalSize = 0;
+
+    await this.walkDirectoryForAnalysis(
+      ".",
+      fileTree,
+      textFiles,
+      languages,
+      totalSize,
+    );
+
+    return this.formatProjectOverview(
+      fileTree,
+      textFiles,
+      languages,
+      totalSize,
+    );
+  }
+
+  private async getFileTree(): Promise<string> {
+    await this.loadGitignore();
+    const fileTree: string[] = [];
+
+    await this.walkDirectorySimple(".", fileTree);
+
+    return `# Project File Tree\n\n\`\`\`\n${fileTree.join("\n")}\n\`\`\``;
+  }
+
+  private async readSelectedFiles(files: string[]): Promise<string> {
+    if (files.length === 0) {
+      return "No files specified for reading.";
+    }
+
+    let result = `# Selected Files Analysis\n\n`;
+
+    for (const file of files) {
+      try {
+        const stat = await Deno.stat(file);
+        const content = await this.readFileWithSampling(file, stat.size);
+        result += `## ${file}\n\n`;
+        result += `**Size:** ${stat.size} bytes\n\n`;
+        result += `\`\`\`\n${content}\n\`\`\`\n\n`;
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        result += `## ${file}\n\nError reading file: ${errorMsg}\n\n`;
+      }
+    }
+
+    return result;
+  }
+
+  private async walkDirectoryForAnalysis(
+    dir: string,
+    fileTree: string[],
+    textFiles: Array<{ path: string; size: number; ext: string }>,
+    languages: { [ext: string]: number },
+    totalSize: number,
+    depth = 0,
+  ): Promise<void> {
+    if (depth > 10) return; // Prevent infinite recursion
+
+    try {
+      for await (const entry of Deno.readDir(dir)) {
+        const fullPath = dir === "." ? entry.name : `${dir}/${entry.name}`;
+
+        // Skip files/dirs based on .gitignore
+        if (this.isIgnored(fullPath)) {
+          continue;
+        }
+
+        const indent = "  ".repeat(depth);
+        fileTree.push(`${indent}${entry.name}${entry.isDirectory ? "/" : ""}`);
+
+        if (entry.isFile) {
+          const stat = await Deno.stat(fullPath);
+          const extension = this.getFileExtension(entry.name);
+
+          if (this.isTextFile(entry.name, stat.size)) {
+            textFiles.push({
+              path: fullPath,
+              size: stat.size,
+              ext: extension,
+            });
+            languages[extension] = (languages[extension] || 0) + 1;
+            totalSize += stat.size;
+          }
+        } else if (entry.isDirectory) {
+          await this.walkDirectoryForAnalysis(
+            fullPath,
+            fileTree,
+            textFiles,
+            languages,
+            totalSize,
+            depth + 1,
+          );
+        }
+      }
+    } catch {
+      // Skip directories we can't read
+    }
+  }
+
+  private async walkDirectorySimple(
+    dir: string,
+    fileTree: string[],
+    depth = 0,
+  ): Promise<void> {
+    if (depth > 10) return;
+
+    try {
+      for await (const entry of Deno.readDir(dir)) {
+        const fullPath = dir === "." ? entry.name : `${dir}/${entry.name}`;
+
+        if (this.isIgnored(fullPath)) {
+          continue;
+        }
+
+        const indent = "  ".repeat(depth);
+        fileTree.push(`${indent}${entry.name}${entry.isDirectory ? "/" : ""}`);
+
+        if (entry.isDirectory) {
+          await this.walkDirectorySimple(fullPath, fileTree, depth + 1);
+        }
+      }
+    } catch {
+      // Skip directories we can't read
+    }
+  }
+
+  private getFileExtension(filename: string): string {
+    const lastDot = filename.lastIndexOf(".");
+    return lastDot > 0 ? filename.slice(lastDot + 1).toLowerCase() : "";
+  }
+
+  private isTextFile(filename: string, size: number): boolean {
+    // Skip very large files (> 10MB)
+    if (size > 10 * 1024 * 1024) return false;
+
+    const ext = this.getFileExtension(filename);
+
+    // Binary/media extensions to skip
+    const binaryExts = new Set([
+      // Images
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "bmp",
+      "svg",
+      "ico",
+      "webp",
+      // Videos
+      "mp4",
+      "avi",
+      "mov",
+      "wmv",
+      "flv",
+      "webm",
+      "mkv",
+      // Audio
+      "mp3",
+      "wav",
+      "flac",
+      "aac",
+      "ogg",
+      "wma",
+      // Documents
+      "pdf",
+      "doc",
+      "docx",
+      "xls",
+      "xlsx",
+      "ppt",
+      "pptx",
+      // Archives
+      "zip",
+      "tar",
+      "gz",
+      "rar",
+      "7z",
+      "bz2",
+      "xz",
+      // Executables
+      "exe",
+      "dll",
+      "so",
+      "dylib",
+      "app",
+      "deb",
+      "rpm",
+      // Fonts
+      "ttf",
+      "otf",
+      "woff",
+      "woff2",
+      "eot",
+      // Other binary
+      "bin",
+      "dat",
+      "db",
+      "sqlite",
+      "sqlite3",
+    ]);
+
+    if (binaryExts.has(ext)) return false;
+
+    // Common text extensions
+    const textExts = new Set([
+      "txt",
+      "md",
+      "rst",
+      "log",
+      "cfg",
+      "conf",
+      "ini",
+      "yml",
+      "yaml",
+      "toml",
+      "js",
+      "ts",
+      "jsx",
+      "tsx",
+      "json",
+      "html",
+      "htm",
+      "css",
+      "scss",
+      "sass",
+      "py",
+      "rb",
+      "php",
+      "java",
+      "c",
+      "cpp",
+      "cc",
+      "cxx",
+      "h",
+      "hpp",
+      "rs",
+      "go",
+      "sh",
+      "bash",
+      "zsh",
+      "fish",
+      "ps1",
+      "bat",
+      "cmd",
+      "xml",
+      "svg",
+      "csv",
+      "sql",
+      "dockerfile",
+      "makefile",
+    ]);
+
+    if (textExts.has(ext)) return true;
+
+    // Files without extensions - check if they might be text (config files, etc.)
+    if (!ext) {
+      const textFilenames = new Set([
+        "readme",
+        "license",
+        "changelog",
+        "makefile",
+        "dockerfile",
+        "procfile",
+        "gitignore",
+        "gitattributes",
+        "editorconfig",
+        "npmignore",
+      ]);
+      return textFilenames.has(filename.toLowerCase());
+    }
+
+    return false;
+  }
+
+  private formatProjectOverview(
+    fileTree: string[],
+    textFiles: Array<{ path: string; size: number; ext: string }>,
+    languages: { [ext: string]: number },
+    totalSize: number,
+  ): string {
+    let result = `# Project Overview\n\n`;
+    result += `**Stats:** ${textFiles.length} text files, ${Math.round(totalSize / 1024)}KB total\n\n`;
+
+    // Language breakdown
+    if (Object.keys(languages).length > 0) {
+      result += `**Languages detected:**\n`;
+      const sorted = Object.entries(languages)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10);
+      for (const [ext, count] of sorted) {
+        result += `- ${ext || "no-ext"}: ${count} files\n`;
+      }
+      result += `\n`;
+    }
+
+    // File tree (truncated if too large)
+    result += `**Project Structure:**\n\`\`\`\n`;
+    const maxTreeLines = 100;
+    if (fileTree.length > maxTreeLines) {
+      result += fileTree.slice(0, maxTreeLines).join("\n");
+      result += `\n... (${fileTree.length - maxTreeLines} more items)\n`;
+    } else {
+      result += fileTree.join("\n");
+    }
+    result += `\n\`\`\`\n\n`;
+
+    // Most important looking files for LLM to consider
+    result += `**Text files available for analysis:** ${textFiles.length} files\n`;
+
+    return result;
+  }
+
+  private async readFileWithSampling(
+    file: string,
+    size: number,
+  ): Promise<string> {
+    // For small files, read completely
+    if (size < 10000) {
+      return await Deno.readTextFile(file);
+    }
+
+    // For large files, sample strategically
+    const content = await Deno.readTextFile(file);
+    const lines = content.split("\n");
+
+    if (lines.length <= 200) {
+      return content;
+    }
+
+    // Sample: first 100 lines + last 50 lines
+    let sampled: string[] = [];
+
+    sampled.push("// --- START OF FILE ---");
+    sampled.push(...lines.slice(0, 100));
+
+    if (lines.length > 150) {
+      sampled.push(`\n// --- SKIPPED ${lines.length - 150} LINES ---\n`);
+      sampled.push(...lines.slice(-50));
+    }
+
+    return sampled.join("\n");
   }
 }

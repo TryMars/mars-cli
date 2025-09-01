@@ -71,7 +71,6 @@ export const runBaseAgentTests = (config: BaseAgentTestConfig) => {
       try {
         await config.agent.createResponse({
           content: "hello there",
-          messages: [],
           addMessage: context.addMessage,
           setContextWindowUsage: context.setContextWindowUsage,
           setUsageCost: context.setUsageCost,
@@ -107,7 +106,6 @@ export const runBaseAgentTests = (config: BaseAgentTestConfig) => {
 
         await config.agent.createResponse({
           content: "test message",
-          messages: [],
           addMessage: context.addMessage,
           setContextWindowUsage: context.setContextWindowUsage,
           setUsageCost: context.setUsageCost,
@@ -134,7 +132,6 @@ export const runBaseAgentTests = (config: BaseAgentTestConfig) => {
       try {
         await config.agent.createResponse({
           content: "test message",
-          messages: [],
           addMessage: context.addMessage,
           setContextWindowUsage: context.setContextWindowUsage,
           setUsageCost: context.setUsageCost,
@@ -165,7 +162,6 @@ export const runBaseAgentTests = (config: BaseAgentTestConfig) => {
       try {
         await config.agent.createResponse({
           content: "test message",
-          messages: [],
           addMessage: context.addMessage,
           setContextWindowUsage: context.setContextWindowUsage,
           setUsageCost: context.setUsageCost,

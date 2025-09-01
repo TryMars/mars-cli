@@ -14,7 +14,7 @@ import {
 import { llmMessages } from "./llm_messages.ts";
 import { Model } from "./agents/agents_types.ts";
 import { AnthropicConfig } from "./agents/anthropic/anthropic_config.ts";
-import { FindFileConfig } from "./tools/find_file/find_file_config.ts";
+import { SearchCWDConfig } from "./tools/search_cwd/search_cwd_config.ts";
 
 describe("agents", () => {
   describe("getAvailableModels", () => {
@@ -94,7 +94,7 @@ describe("agents", () => {
 
   describe("getAvailableTools", () => {
     it("includes find_file", () => {
-      expect(getAvailableTools()).toContainEqual(FindFileConfig.schema);
+      expect(getAvailableTools()).toContainEqual(SearchCWDConfig.schema);
     });
   });
 });

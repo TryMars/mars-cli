@@ -11,7 +11,7 @@ export type CreateMessageProps = {
 
 export type Message = {
   id: string;
-  from: "user" | "assistant" | "system";
+  from: "user" | "assistant" | "system" | "tool_call" | "tool_call_error";
   content: string;
   timestamp: Date;
   state: "success" | "warning" | "error" | "neutral";

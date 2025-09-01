@@ -17,7 +17,15 @@ export const MessageList = () => {
           {message.from !== "system" && (
             <Box flexShrink={1}>{getMessagePrefix(message.from)}</Box>
           )}
-          <Box marginLeft={message.from === "assistant" ? 0 : 1}>
+          <Box
+            marginLeft={
+              message.from === "tool_call" ||
+              message.from === "tool_call_error" ||
+              message.from === "assistant"
+                ? 0
+                : 1
+            }
+          >
             <Text
               dimColor={message.from === "user"}
               color={getMessageColor(message.state)}
