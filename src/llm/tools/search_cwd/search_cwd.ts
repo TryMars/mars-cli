@@ -468,7 +468,7 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
 
     await this.walkDirectorySimple(".", fileTree);
 
-    return `# Project File Tree\n\n\`\`\`\n${fileTree.join("\n")}\n\`\`\``;
+    return `Project File Tree\n\n\`\`\`\n${fileTree.join("\n")}\n\`\`\``;
   }
 
   private async readSelectedFiles(files: string[]): Promise<string> {
@@ -476,18 +476,18 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
       return "No files specified for reading.";
     }
 
-    let result = `# Selected Files Analysis\n\n`;
+    let result = `Selected Files Analysis\n\n`;
 
     for (const file of files) {
       try {
         const stat = await Deno.stat(file);
         const content = await this.readFileWithSampling(file, stat.size);
-        result += `## ${file}\n\n`;
-        result += `**Size:** ${stat.size} bytes\n\n`;
+        result += `${file}\n\n`;
+        result += `Size: ${stat.size} bytes\n\n`;
         result += `\`\`\`\n${content}\n\`\`\`\n\n`;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        result += `## ${file}\n\nError reading file: ${errorMsg}\n\n`;
+        result += `${file}\n\nError reading file: ${errorMsg}\n\n`;
       }
     }
 
@@ -726,12 +726,12 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
     languages: { [ext: string]: number },
     totalSize: number,
   ): string {
-    let result = `# Project Overview\n\n`;
-    result += `**Stats:** ${textFiles.length} text files, ${Math.round(totalSize / 1024)}KB total\n\n`;
+    let result = `Project Overview\n\n`;
+    result += `Stats: ${textFiles.length} text files, ${Math.round(totalSize / 1024)}KB total\n\n`;
 
     // Language breakdown
     if (Object.keys(languages).length > 0) {
-      result += `**Languages detected:**\n`;
+      result += `Languages detected:\n`;
       const sorted = Object.entries(languages)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 10);
@@ -742,7 +742,7 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
     }
 
     // File tree (truncated if too large)
-    result += `**Project Structure:**\n\`\`\`\n`;
+    result += `Project Structure:\n\`\`\`\n`;
     const maxTreeLines = 100;
     if (fileTree.length > maxTreeLines) {
       result += fileTree.slice(0, maxTreeLines).join("\n");
@@ -753,7 +753,7 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
     result += `\n\`\`\`\n\n`;
 
     // Most important looking files for LLM to consider
-    result += `**Text files available for analysis:** ${textFiles.length} files\n`;
+    result += `Text files available for analysis: ${textFiles.length} files\n`;
 
     return result;
   }
