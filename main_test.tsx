@@ -11,7 +11,7 @@ import { exists } from "@std/fs";
 import { getAgentInstanceByProviderId } from "#llm/llm.ts";
 import { stub } from "jsr:@std/testing/mock";
 import { inputBoxMessages } from "#components/input_box/input_box_messages.ts";
-import { marsMessages } from "#components/mars/mars_messages.ts";
+import { moonlightMessages } from "#components/moonlight/moonlight_messages.ts";
 
 const runCLI = async (
   args: Array<string> = [],
@@ -42,51 +42,53 @@ describe(
     });
 
     describe("app", () => {
-      const testMarsDir = `${Deno.cwd()}/tests/storage/.mars`;
+      const testMoonlightDir = `${Deno.cwd()}/tests/storage/.moonlight`;
 
       beforeAll(async () => {
-        if (await exists(testMarsDir)) {
-          await Deno.remove(testMarsDir);
+        if (await exists(testMoonlightDir)) {
+          await Deno.remove(testMoonlightDir, { recursive: true });
         }
       });
 
       afterAll(async () => {
-        if (await exists(testMarsDir)) {
-          await Deno.remove(testMarsDir);
+        if (await exists(testMoonlightDir)) {
+          await Deno.remove(testMoonlightDir, { recursive: true });
         }
       });
 
       describe("headless mode", () => {
         it("enters in headed mode by default", () => {
-          const marsApp = <App />;
+          const moonlightApp = <App />;
 
-          const { lastFrame, cleanup } = render(marsApp);
+          const { lastFrame, cleanup } = render(moonlightApp);
 
           // should not see a headless mode confirmation message
-          expect(lastFrame()).not.toContain(marsMessages.headless.enabled());
+          expect(lastFrame()).not.toContain(
+            moonlightMessages.headless.enabled(),
+          );
 
           cleanup();
         });
 
         it("can enter in headless mode", () => {
-          const marsApp = <App headlessMode />;
+          const moonlightApp = <App headlessMode />;
 
-          const { lastFrame, cleanup, rerender } = render(marsApp);
+          const { lastFrame, cleanup, rerender } = render(moonlightApp);
 
           // needs to rerender to give the headless mode confirmation
           // message the time it needs to display.
-          rerender(marsApp);
+          rerender(moonlightApp);
 
           // should see a headless mode confirmation message
-          expect(lastFrame()).toContain(marsMessages.headless.enabled());
+          expect(lastFrame()).toContain(moonlightMessages.headless.enabled());
 
           cleanup();
         });
       });
 
       describe("input box", () => {
-        const marsApp = <App />;
-        const { lastFrame, stdin, rerender, cleanup } = render(marsApp);
+        const moonlightApp = <App />;
+        const { lastFrame, stdin, rerender, cleanup } = render(moonlightApp);
         const input = "this is my input";
 
         it("renders input box", () => {
@@ -134,7 +136,7 @@ describe(
           it("handles submitting empty input", () => {
             // \r is the equivalent of pressing "enter/return"
             stdin.write("\r");
-            rerender(marsApp);
+            rerender(moonlightApp);
 
             // we should not see the loader since nothing was submitted
             expect(lastFrame()).not.toContain("Thinking...");
@@ -142,7 +144,7 @@ describe(
 
           it("handles submitting", () => {
             stdin.write(input);
-            rerender(marsApp);
+            rerender(moonlightApp);
 
             expect(lastFrame()).not.toContain(
               inputBoxMessages.input.placeholder(),
@@ -151,7 +153,7 @@ describe(
 
             // \r is the equivalent of pressing "enter/return"
             stdin.write("\r");
-            rerender(marsApp);
+            rerender(moonlightApp);
 
             // we should see the placeholder again since the input
             // box should be cleared after submit
@@ -181,7 +183,7 @@ describe(
           });
 
           it("receives response from llm", () => {
-            rerender(marsApp);
+            rerender(moonlightApp);
 
             expect(lastFrame()).toContain("⏺ " + mockedResponseContent);
           });

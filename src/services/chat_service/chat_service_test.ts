@@ -19,15 +19,15 @@ describe("chat service", () => {
   it("initializes paths correctly", () => {
     const homeDir = getHomeDir();
 
-    expect(chatService.marsDir).toBe(join(homeDir, chatService.marsDirName));
+    expect(chatService.moonlightDir).toBe(join(homeDir, chatService.moonlightDirName));
     expect(chatService.chatsDir).toBe(
-      join(homeDir, chatService.marsDirName, "chats"),
+      join(homeDir, chatService.moonlightDirName, "chats"),
     );
     expect(chatService.configPath).toBe(
-      join(homeDir, chatService.marsDirName, "config.json"),
+      join(homeDir, chatService.moonlightDirName, "config.json"),
     );
     expect(chatService.backupsDir).toBe(
-      join(homeDir, chatService.marsDirName, "backups"),
+      join(homeDir, chatService.moonlightDirName, "backups"),
     );
   });
 
@@ -92,14 +92,14 @@ describe("chat service", () => {
     await chatService.cleanup();
   });
 
-  it("cleanup removes mars directory", async () => {
+  it("cleanup removes moonlight directory", async () => {
     await chatService.initialize();
 
-    expect(await exists(chatService.marsDir)).toBe(true);
+    expect(await exists(chatService.moonlightDir)).toBe(true);
 
     await chatService.cleanup();
 
-    expect(await exists(chatService.marsDir)).toBe(false);
+    expect(await exists(chatService.moonlightDir)).toBe(false);
   });
 
   it("cleanup only works in test mode", async () => {

@@ -24,7 +24,7 @@ export const LoadingIndicator = () => {
         <Spinner type="star" />
       </Box>
       <Text dimColor>
-        <Text bold color="red">
+        <Text bold color="yellow">
           Thinking...
         </Text>
         {" · "}

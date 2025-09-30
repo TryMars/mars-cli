@@ -68,7 +68,7 @@ export class SearchCWD extends BaseTool<SearchCWDToolParams> {
       case "project_overview":
         return "Analyzing project structure and generating overview...";
       case "read_files":
-        return `Reading ${params.files?.length || 0} selected files for clearer understanding...`;
+        return `Reading ${params.files?.length || 0} selected file${(params.files?.length || 0) > 1 ? "s" : ""}...`;
       case "file_tree":
         return "Generating project file tree...";
       default:

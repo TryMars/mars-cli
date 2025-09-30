@@ -12,8 +12,8 @@ export const defaultAssistantProviderId = "anthropic";
 export class ChatService {
   private static instance: ChatService;
 
-  marsDirName: string;
-  marsDir: string;
+  moonlightDirName: string;
+  moonlightDir: string;
   chatsDir: string;
   configPath: string;
   backupsDir: string;
@@ -21,11 +21,11 @@ export class ChatService {
   private constructor() {
     const homeDir = getHomeDir();
 
-    this.marsDirName = ".mars-new"; // TODO: change to .mars
-    this.marsDir = join(homeDir, this.marsDirName);
-    this.chatsDir = join(this.marsDir, "chats");
-    this.configPath = join(this.marsDir, "config.json");
-    this.backupsDir = join(this.marsDir, "backups");
+    this.moonlightDirName = ".moonlight";
+    this.moonlightDir = join(homeDir, this.moonlightDirName);
+    this.chatsDir = join(this.moonlightDir, "chats");
+    this.configPath = join(this.moonlightDir, "config.json");
+    this.backupsDir = join(this.moonlightDir, "backups");
   }
 
   static getInstance(): ChatService {
@@ -95,8 +95,8 @@ export class ChatService {
     }
 
     try {
-      if (await exists(this.marsDir)) {
-        await Deno.remove(this.marsDir, { recursive: true });
+      if (await exists(this.moonlightDir)) {
+        await Deno.remove(this.moonlightDir, { recursive: true });
       }
     } catch {
       // Directory might not exist or already cleaned up

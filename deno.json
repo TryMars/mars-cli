@@ -5,7 +5,7 @@
   },
   "tasks": {
     "start": "deno run --no-prompt --allow-env --allow-read --allow-write --allow-net --allow-ffi --allow-run main.tsx",
-    "compile": "deno compile --no-prompt --allow-env --allow-read --allow-write --allow-net --allow-ffi --output mars main.tsx",
+    "compile": "deno compile --no-prompt --allow-env --allow-read --allow-write --allow-net --allow-ffi --output moonlight main.tsx",
     "allow": "deno run --no-prompt --allow-env --allow-net --allow-read",
     "test": "deno test --allow-read --allow-write --allow-env --env-file=.env.test --allow-run"
   },

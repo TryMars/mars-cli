@@ -101,7 +101,7 @@ export class Anthropic extends BaseAgent<
       for (const content of message.content) {
         if (content.type === "text") {
           addMessage({
-            content: this.stripMarkdownSyntax(content.text),
+            content: content.text,
             from: "assistant",
           });
         } else if (content.type === "tool_use") {

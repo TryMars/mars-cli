@@ -105,12 +105,4 @@ export abstract class BaseAgent<
       (tokenUsage.outputTokens * pricing.output_cost) / 1_000_000
     );
   }
-
-  protected stripMarkdownSyntax(content: string): string {
-    return content
-      .replace(/^#+\s*/gm, "")
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/\*(.*?)\*/g, "$1")
-      .replace(/_(.*?)_/g, "$1");
-  }
 }

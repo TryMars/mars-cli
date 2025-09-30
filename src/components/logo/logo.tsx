@@ -2,11 +2,11 @@ import { Box, Text } from "ink";
 
 const Logo = () => {
   return (
-    <Box flexDirection="column" gap={0} marginY={1} paddingX={1}>
+    <Box flexDirection="column" gap={0} marginTop={1} paddingX={1}>
       <Box marginBottom={1} flexDirection="column">
         <Text>🌙 moonlight.</Text>
 
-        <Text dimColor>Your lightweight and affordable AI coding agent</Text>
+        <Text dimColor>Your open-source alternative to Claude Code</Text>
       </Box>
 
       <Box flexDirection="column">

@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { MessageContext } from "#context/message_context/message_context.tsx";
 import { Box, Text } from "ink";
 import {
+  formatMessageContent,
   getMessageColor,
   getMessagePrefix,
 } from "#components/message_list/message_list_utils.tsx";
@@ -30,7 +31,7 @@ export const MessageList = () => {
               dimColor={message.from === "user"}
               color={getMessageColor(message.state)}
             >
-              {message.content}
+              {formatMessageContent(message)}
             </Text>
           </Box>
         </Box>
